@@ -37,8 +37,8 @@ export const levels: Level[] = [
       [
         tile('2-0', 'empty'),
         tile('2-1', 'firewall', 0, true),
-        tile('2-2', 'straight', 0),
-        tile('2-3', 'corner', 270),
+        tile('2-2', 'corner', 0),
+        tile('2-3', 'straight', 90),
         tile('2-4', 'destination', 270, true),
       ],
       [
