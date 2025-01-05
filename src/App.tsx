@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { GameBoard } from './components/GameBoard'
+import { TutorialPanel } from './components/TutorialPanel'
 import { createGameState, rotateTile } from './game/engine'
 import { levels } from './game/levels'
+
 
 function App() {
   const [gameState, setGameState] = useState(() => createGameState(levels[0]))
@@ -34,45 +36,49 @@ function App() {
           </div>
         </div>
 
-        <aside className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 shadow-2xl shadow-cyan-950/30">
-          <p className="text-sm font-medium uppercase tracking-[0.3em] text-cyan-300">
-            Level {gameState.level.id}
-          </p>
+        <div className="space-y-6">
+          <aside className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 shadow-2xl shadow-cyan-950/30">
+            <p className="text-sm font-medium uppercase tracking-[0.3em] text-cyan-300">
+              Level {gameState.level.id}
+            </p>
 
-          <h2 className="mt-3 text-2xl font-bold">{gameState.level.name}</h2>
+            <h2 className="mt-3 text-2xl font-bold">{gameState.level.name}</h2>
 
-          <p className="mt-3 text-sm leading-6 text-slate-300">
-            {gameState.level.description}
-          </p>
+            <p className="mt-3 text-sm leading-6 text-slate-300">
+              {gameState.level.description}
+            </p>
 
-          <div className="mt-8 grid gap-4">
-            <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
-              <p className="text-sm text-slate-400">Moves</p>
-              <p className="mt-1 text-3xl font-bold">{gameState.moves}</p>
+            <div className="mt-8 grid gap-4">
+              <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
+                <p className="text-sm text-slate-400">Moves</p>
+                <p className="mt-1 text-3xl font-bold">{gameState.moves}</p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
+                <p className="text-sm text-slate-400">Status</p>
+                <p className="mt-1 text-xl font-semibold">
+                  {gameState.status === 'completed' ? 'Route restored' : 'Routing in progress'}
+                </p>
+              </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
-              <p className="text-sm text-slate-400">Status</p>
-              <p className="mt-1 text-xl font-semibold">
-                {gameState.status === 'completed' ? 'Route restored' : 'Routing in progress'}
-              </p>
-            </div>
-          </div>
+            {gameState.status === 'completed' && (
+              <div className="mt-6 rounded-2xl border border-emerald-400/30 bg-emerald-400/10 p-4 text-emerald-200">
+                Nice work. The packet can now reach the destination.
+              </div>
+            )}
 
-          {gameState.status === 'completed' && (
-            <div className="mt-6 rounded-2xl border border-emerald-400/30 bg-emerald-400/10 p-4 text-emerald-200">
-              Nice work. The packet can now reach the destination.
-            </div>
-          )}
+            <button
+              type="button"
+              onClick={handleRestart}
+              className="mt-6 w-full rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 shadow-lg shadow-cyan-400/20 transition hover:bg-cyan-300"
+            >
+              Restart Level
+            </button>
+          </aside>
 
-          <button
-            type="button"
-            onClick={handleRestart}
-            className="mt-6 w-full rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 shadow-lg shadow-cyan-400/20 transition hover:bg-cyan-300"
-          >
-            Restart Level
-          </button>
-        </aside>
+          <TutorialPanel />
+        </div>
       </section>
     </main>
   )
