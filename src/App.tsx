@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { GameBoard } from './components/GameBoard'
+import { LevelSelector } from './components/LevelSelector'
 import { TutorialPanel } from './components/TutorialPanel'
 import { createGameState, rotateTile } from './game/engine'
 import { levels } from './game/levels'
@@ -26,6 +27,15 @@ function App() {
 
   function handleRestart() {
     setGameState(createGameState(levels[activeLevelIndex]))
+  }
+
+  function handleSelectLevel(levelIndex: number) {
+    const selectedLevel = levels[levelIndex]
+
+    if (selectedLevel.id > progress.highestUnlockedLevelId) return
+
+    setActiveLevelIndex(levelIndex)
+    setGameState(createGameState(selectedLevel))
   }
 
   function handleNextLevel() {
@@ -153,6 +163,13 @@ function App() {
           </aside>
 
           <TutorialPanel />
+
+          <LevelSelector
+            levels={levels}
+            activeLevelId={gameState.level.id}
+            progress={progress}
+            onSelectLevel={handleSelectLevel}
+          />
         </div>
       </section>
     </main>
