@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { GameBoard } from './components/GameBoard'
 import { LevelSelector } from './components/LevelSelector'
-import { TutorialPanel } from './components/TutorialPanel'
+import { OnboardingScreen } from './components/OnboardingScreen'
 import { createGameState, rotateTile } from './game/engine'
 import { levels } from './game/levels'
 import { calculateLevelScore } from './game/scoring'
 import { loadProgress, saveLevelProgress } from './storage/progressStorage'
 
 function App() {
+  const [hasStartedGame, setHasStartedGame] = useState(false)
   const [activeLevelIndex, setActiveLevelIndex] = useState(0)
   const [gameState, setGameState] = useState(() => createGameState(levels[0]))
   const [progress, setProgress] = useState(() => loadProgress())
@@ -54,6 +55,10 @@ function App() {
     setProgress(updatedProgress)
     setActiveLevelIndex(nextLevelIndex)
     setGameState(createGameState(nextLevel))
+  }
+
+  if (!hasStartedGame) {
+    return <OnboardingScreen onStart={() => setHasStartedGame(true)} />
   }
 
   return (
@@ -117,7 +122,9 @@ function App() {
               {currentLevelProgress && (
                 <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
                   <p className="text-sm text-slate-400">Best Result</p>
-                  <p className="mt-1 text-xl font-bold">{currentLevelProgress.bestScore} pts</p>
+                  <p className="mt-1 text-xl font-bold">
+                    {currentLevelProgress.bestScore} pts
+                  </p>
                   <p className="mt-1 text-sm text-slate-400">
                     Best moves: {currentLevelProgress.bestMoves}
                   </p>
@@ -161,8 +168,6 @@ function App() {
               </button>
             </div>
           </aside>
-
-          <TutorialPanel />
 
           <LevelSelector
             levels={levels}
