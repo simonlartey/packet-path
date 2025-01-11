@@ -15,12 +15,12 @@ export function LevelSelector({
   onSelectLevel,
 }: LevelSelectorProps) {
   return (
-    <section className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 shadow-2xl shadow-cyan-950/30">
+    <section className="rounded-3xl border border-slate-800 bg-slate-900/70 p-5 shadow-2xl shadow-cyan-950/30">
       <p className="text-sm font-medium uppercase tracking-[0.3em] text-cyan-300">
         Levels
       </p>
 
-      <div className="mt-5 grid gap-3">
+      <div className="mt-4 grid gap-3">
         {levels.map((level, index) => {
           const isUnlocked = level.id <= progress.highestUnlockedLevelId
           const isActive = level.id === activeLevelId
@@ -32,7 +32,7 @@ export function LevelSelector({
               type="button"
               disabled={!isUnlocked}
               onClick={() => onSelectLevel(index)}
-              className={`rounded-2xl border p-4 text-left transition ${
+              className={`rounded-2xl border p-3 text-left transition ${
                 isActive
                   ? 'border-cyan-400 bg-cyan-400/10'
                   : isUnlocked
@@ -42,29 +42,30 @@ export function LevelSelector({
             >
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="font-semibold text-slate-100">
-                    Level {level.id}: {level.name}
+                  <p className="text-sm font-bold text-slate-100">
+                    Level {level.id}
                   </p>
 
                   <p className="mt-1 text-xs text-slate-400">
-                    {isUnlocked ? 'Unlocked' : 'Locked'}
+                    {level.name}
                   </p>
                 </div>
 
-                {!isUnlocked && (
-                  <span className="rounded-full bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-400">
-                    Locked
-                  </span>
-                )}
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                    isUnlocked
+                      ? 'bg-cyan-400/10 text-cyan-300'
+                      : 'bg-slate-800 text-slate-400'
+                  }`}
+                >
+                  {isUnlocked ? 'Open' : 'Locked'}
+                </span>
               </div>
 
               {levelProgress && (
-                <div className="mt-3 rounded-xl border border-slate-800 bg-slate-950/70 p-3">
-                  <p className="text-xs text-slate-400">Best Result</p>
-                  <p className="mt-1 text-sm font-bold text-cyan-300">
-                    {levelProgress.bestScore} pts · {levelProgress.bestMoves} moves
-                  </p>
-                </div>
+                <p className="mt-2 text-xs font-semibold text-cyan-300">
+                  Best: {levelProgress.bestScore} pts · {levelProgress.bestMoves} moves
+                </p>
               )}
             </button>
           )
