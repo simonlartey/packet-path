@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { CompletionModal } from './components/CompletionModal'
 import { GameBoard } from './components/GameBoard'
 import { LevelSelector } from './components/LevelSelector'
 import { OnboardingScreen } from './components/OnboardingScreen'
@@ -12,6 +13,7 @@ function App() {
   const [activeLevelIndex, setActiveLevelIndex] = useState(0)
   const [gameState, setGameState] = useState(() => createGameState(levels[0]))
   const [progress, setProgress] = useState(() => loadProgress())
+  const [showCompletionModal, setShowCompletionModal] = useState(false)
 
   const hasNextLevel = activeLevelIndex < levels.length - 1
 
@@ -23,10 +25,22 @@ function App() {
   const currentLevelProgress = progress.completedLevels[gameState.level.id]
 
   function handleRotateTile(row: number, col: number) {
-    setGameState((currentState) => rotateTile(currentState, row, col))
+    setGameState((currentState) => {
+      const nextState = rotateTile(currentState, row, col)
+
+      if (
+        currentState.status !== 'completed' &&
+        nextState.status === 'completed'
+      ) {
+        setShowCompletionModal(true)
+      }
+
+      return nextState
+    })
   }
 
   function handleRestart() {
+    setShowCompletionModal(false)
     setGameState(createGameState(levels[activeLevelIndex]))
   }
 
@@ -35,6 +49,7 @@ function App() {
 
     if (selectedLevel.id > progress.highestUnlockedLevelId) return
 
+    setShowCompletionModal(false)
     setActiveLevelIndex(levelIndex)
     setGameState(createGameState(selectedLevel))
   }
@@ -52,6 +67,7 @@ function App() {
       nextLevel.id,
     )
 
+    setShowCompletionModal(false)
     setProgress(updatedProgress)
     setActiveLevelIndex(nextLevelIndex)
     setGameState(createGameState(nextLevel))
@@ -63,6 +79,20 @@ function App() {
 
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-8 text-slate-100">
+      {showCompletionModal && levelScore && (
+        <CompletionModal
+          levelName={gameState.level.name}
+          score={levelScore.score}
+          moves={gameState.moves}
+          rating={levelScore.rating}
+          canAdvance={levelScore.canAdvance}
+          hasNextLevel={hasNextLevel}
+          onNextLevel={handleNextLevel}
+          onRetry={handleRestart}
+          onClose={() => setShowCompletionModal(false)}
+        />
+      )}
+
       <section className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[1fr_340px]">
         <div>
           <p className="mb-4 inline-flex rounded-full border border-cyan-400/30 bg-cyan-400/10 px-4 py-2 text-sm font-medium text-cyan-300">
