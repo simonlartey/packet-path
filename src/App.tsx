@@ -123,6 +123,29 @@ function App() {
               {gameState.level.description}
             </p>
 
+            <div className="mt-5 grid grid-cols-3 gap-3">
+              <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-3">
+                <p className="text-xs text-slate-500">Difficulty</p>
+                <p className="mt-1 text-sm font-bold text-cyan-300">
+                  {gameState.level.difficulty}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-3">
+                <p className="text-xs text-slate-500">Target</p>
+                <p className="mt-1 text-sm font-bold">
+                  {gameState.level.estimatedMoves} moves
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-3">
+                <p className="text-xs text-slate-500">Type</p>
+                <p className="mt-1 text-sm font-bold">
+                  {gameState.level.category}
+                </p>
+              </div>
+            </div>
+
             <div className="mt-8 grid gap-4">
               <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
                 <p className="text-sm text-slate-400">Moves</p>
