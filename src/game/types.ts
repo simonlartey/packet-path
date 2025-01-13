@@ -20,10 +20,15 @@ export type Tile = {
   locked?: boolean
 }
 
+export type LevelDifficulty = 'Easy' | 'Medium' | 'Hard'
+
 export type Level = {
   id: number
   name: string
   description: string
+  difficulty: LevelDifficulty
+  estimatedMoves: number
+  category: string
   rows: number
   cols: number
   tiles: Tile[][]
