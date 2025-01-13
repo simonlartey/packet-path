@@ -17,6 +17,9 @@ export const levels: Level[] = [
     id: 1,
     name: 'First Connection',
     description: 'Rotate the network tiles to connect the source to the destination.',
+    difficulty: 'Easy',
+    estimatedMoves: 3,
+    category: 'Starter Route',
     rows: 5,
     cols: 5,
     tiles: [
@@ -61,6 +64,9 @@ export const levels: Level[] = [
     id: 2,
     name: 'Firewall Detour',
     description: 'Route around blocked nodes and restore the packet path.',
+    difficulty: 'Medium',
+    estimatedMoves: 5,
+    category: 'Firewall Detour',
     rows: 5,
     cols: 5,
     tiles: [
@@ -105,6 +111,9 @@ export const levels: Level[] = [
     id: 3,
     name: 'Long Route',
     description: 'Use a longer route to guide the packet through the network.',
+    difficulty: 'Hard',
+    estimatedMoves: 7,
+    category: 'Long Route',
     rows: 5,
     cols: 5,
     tiles: [
