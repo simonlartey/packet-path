@@ -49,6 +49,10 @@ export function LevelSelector({
                   <p className="mt-1 text-xs text-slate-400">
                     {level.name}
                   </p>
+
+                  <p className="mt-1 text-xs text-slate-500">
+                    {level.difficulty} · Target: {level.estimatedMoves} moves
+                  </p>
                 </div>
 
                 <span
