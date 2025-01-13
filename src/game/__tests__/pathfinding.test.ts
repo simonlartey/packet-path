@@ -20,6 +20,9 @@ describe('hasValidPath', () => {
       id: 1,
       name: 'Connected',
       description: 'Connected test level',
+      difficulty: 'Easy',
+      estimatedMoves: 1,
+      category: 'Test',
       rows: 1,
       cols: 3,
       tiles: [
@@ -39,6 +42,9 @@ describe('hasValidPath', () => {
       id: 2,
       name: 'Blocked',
       description: 'Blocked test level',
+      difficulty: 'Easy',
+      estimatedMoves: 1,
+      category: 'Test',
       rows: 1,
       cols: 3,
       tiles: [
@@ -58,6 +64,9 @@ describe('hasValidPath', () => {
       id: 3,
       name: 'Misaligned',
       description: 'Misaligned test level',
+      difficulty: 'Easy',
+      estimatedMoves: 1,
+      category: 'Test',
       rows: 1,
       cols: 3,
       tiles: [
