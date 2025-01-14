@@ -32,7 +32,15 @@ export function LevelSelector({
               type="button"
               disabled={!isUnlocked}
               onClick={() => onSelectLevel(index)}
-              className={`rounded-2xl border p-3 text-left transition ${
+              aria-current={isActive ? 'true' : undefined}
+              aria-label={`Level ${level.id}, ${level.name}. ${level.difficulty} difficulty. Target ${level.estimatedMoves} moves. ${
+                isUnlocked ? 'Unlocked.' : 'Locked.'
+              } ${
+                levelProgress
+                  ? `Best score ${levelProgress.bestScore} points in ${levelProgress.bestMoves} moves.`
+                  : 'No completed score yet.'
+              }`}
+              className={`rounded-2xl border p-3 text-left transition focus:outline-none focus:ring-2 focus:ring-cyan-300 focus:ring-offset-2 focus:ring-offset-slate-950 ${
                 isActive
                   ? 'border-cyan-400 bg-cyan-400/10'
                   : isUnlocked
