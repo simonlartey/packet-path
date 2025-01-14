@@ -3,6 +3,8 @@ import { getTileConnections } from '../game/pathfinding'
 
 type TileProps = {
   tile: TileModel
+  row: number
+  col: number
   onRotate: () => void
 }
 
@@ -15,7 +17,7 @@ const connectionClasses: Record<Direction, string> = {
 
 function getTileClasses(tile: TileModel): string {
   const base =
-    'relative flex h-24 w-24 items-center justify-center rounded-2xl border transition'
+    'relative flex h-24 w-24 items-center justify-center rounded-2xl border transition focus:outline-none focus:ring-2 focus:ring-cyan-300 focus:ring-offset-2 focus:ring-offset-slate-950'
 
   if (tile.type === 'source') {
     return `${base} border-emerald-400 bg-emerald-400/15 shadow-lg shadow-emerald-400/20`
@@ -36,6 +38,25 @@ function getTileClasses(tile: TileModel): string {
   return `${base} cursor-pointer border-slate-700 bg-slate-800 hover:border-cyan-400 hover:bg-slate-700`
 }
 
+function getTileDescription(tile: TileModel, row: number, col: number): string {
+  const position = `row ${row + 1}, column ${col + 1}`
+  const rotation = `${tile.rotation} degrees`
+
+  if (tile.type === 'empty') {
+    return `Empty tile at ${position}. This tile cannot be rotated.`
+  }
+
+  if (tile.type === 'firewall') {
+    return `Firewall tile at ${position}. This tile blocks the route and cannot be rotated.`
+  }
+
+  if (tile.locked) {
+    return `${tile.type} tile at ${position}, rotated ${rotation}. This tile is locked and cannot be rotated.`
+  }
+
+  return `${tile.type} tile at ${position}, rotated ${rotation}. Press Enter or Space to rotate this tile.`
+}
+
 function CablePath({ tile }: { tile: TileModel }) {
   const connections = getTileConnections(tile)
 
@@ -53,7 +74,7 @@ function CablePath({ tile }: { tile: TileModel }) {
   )
 }
 
-export function Tile({ tile, onRotate }: TileProps) {
+export function Tile({ tile, row, col, onRotate }: TileProps) {
   const canRotate = !tile.locked && tile.type !== 'empty' && tile.type !== 'firewall'
 
   return (
@@ -62,7 +83,7 @@ export function Tile({ tile, onRotate }: TileProps) {
       disabled={!canRotate}
       onClick={onRotate}
       className={getTileClasses(tile)}
-      aria-label={`${tile.type} tile`}
+      aria-label={getTileDescription(tile, row, col)}
     >
       {(tile.type === 'straight' || tile.type === 'corner') && <CablePath tile={tile} />}
 

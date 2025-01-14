@@ -20,6 +20,8 @@ export function GameBoard({ gameState, onRotateTile }: GameBoardProps) {
             <Tile
               key={tile.id}
               tile={tile}
+              row={rowIndex}
+              col={colIndex}
               onRotate={() => onRotateTile(rowIndex, colIndex)}
             />
           )),
