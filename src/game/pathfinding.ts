@@ -66,6 +66,93 @@ function isInsideBoard(level: Level, position: Position): boolean {
   )
 }
 
+export function getPathSequence(level: Level): string[] {
+  const source = findTile(level, 'source')
+  const destination = findTile(level, 'destination')
+  if (!source || !destination) return []
+
+  const parent = new Map<string, string | null>()
+  const queue: Position[] = [source]
+  const sourceKey = `${source.row}-${source.col}`
+  parent.set(sourceKey, null)
+
+  while (queue.length > 0) {
+    const current = queue.shift()
+    if (!current) continue
+
+    const key = `${current.row}-${current.col}`
+
+    if (current.row === destination.row && current.col === destination.col) {
+      const path: string[] = []
+      let k: string | null = key
+      while (k !== null) {
+        path.unshift(k)
+        k = parent.get(k) ?? null
+      }
+      return path
+    }
+
+    const currentTile = level.tiles[current.row][current.col]
+    const connections = getTileConnections(currentTile)
+
+    for (const direction of connections) {
+      const delta = directionDelta[direction]
+      const next = { row: current.row + delta.row, col: current.col + delta.col }
+      if (!isInsideBoard(level, next)) continue
+
+      const nextTile = level.tiles[next.row][next.col]
+      if (nextTile.type === 'empty' || nextTile.type === 'firewall') continue
+
+      const nextConnections = getTileConnections(nextTile)
+      if (!nextConnections.includes(oppositeDirection[direction])) continue
+
+      const nextKey = `${next.row}-${next.col}`
+      if (!parent.has(nextKey)) {
+        parent.set(nextKey, key)
+        queue.push(next)
+      }
+    }
+  }
+
+  return []
+}
+
+export function getConnectedTileIds(level: Level): Set<string> {
+  const source = findTile(level, 'source')
+  if (!source) return new Set()
+
+  const visited = new Set<string>()
+  const queue: Position[] = [source]
+
+  while (queue.length > 0) {
+    const current = queue.shift()
+    if (!current) continue
+
+    const key = `${current.row}-${current.col}`
+    if (visited.has(key)) continue
+    visited.add(key)
+
+    const currentTile = level.tiles[current.row][current.col]
+    const connections = getTileConnections(currentTile)
+
+    for (const direction of connections) {
+      const delta = directionDelta[direction]
+      const next = { row: current.row + delta.row, col: current.col + delta.col }
+      if (!isInsideBoard(level, next)) continue
+
+      const nextTile = level.tiles[next.row][next.col]
+      if (nextTile.type === 'empty' || nextTile.type === 'firewall') continue
+
+      const nextConnections = getTileConnections(nextTile)
+      if (nextConnections.includes(oppositeDirection[direction])) {
+        queue.push(next)
+      }
+    }
+  }
+
+  return visited
+}
+
 export function hasValidPath(level: Level): boolean {
   const source = findTile(level, 'source')
   const destination = findTile(level, 'destination')
