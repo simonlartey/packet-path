@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { CompletionModal } from './components/CompletionModal'
 import { GameBoard } from './components/GameBoard'
+import { LandingPage } from './components/LandingPage'
 import { LevelSelector } from './components/LevelSelector'
-import { OnboardingScreen } from './components/OnboardingScreen'
 import { createGameState, rotateTile } from './game/engine'
 import { levels } from './game/levels'
 import { calculateLevelScore } from './game/scoring'
@@ -14,6 +14,8 @@ function App() {
   const [gameState, setGameState] = useState(() => createGameState(levels[0]))
   const [progress, setProgress] = useState(() => loadProgress())
   const [showCompletionModal, setShowCompletionModal] = useState(false)
+  const [isCelebrating, setIsCelebrating] = useState(false)
+  const completionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const hasNextLevel = activeLevelIndex < levels.length - 1
 
@@ -23,32 +25,39 @@ function App() {
       : null
 
   const currentLevelProgress = progress.completedLevels[gameState.level.id]
+  const maxLevelScore = 1000 + gameState.level.id * 25
+
+  function clearCompletionTimer() {
+    if (completionTimerRef.current) {
+      clearTimeout(completionTimerRef.current)
+      completionTimerRef.current = null
+    }
+    setIsCelebrating(false)
+  }
 
   function handleRotateTile(row: number, col: number) {
-    setGameState((currentState) => {
-      const nextState = rotateTile(currentState, row, col)
+    setGameState((currentState) => rotateTile(currentState, row, col))
+  }
 
-      if (
-        currentState.status !== 'completed' &&
-        nextState.status === 'completed'
-      ) {
-        setShowCompletionModal(true)
-      }
-
-      return nextState
-    })
+  function handlePacketAnimationComplete() {
+    setIsCelebrating(true)
+    completionTimerRef.current = setTimeout(() => {
+      completionTimerRef.current = null
+      setIsCelebrating(false)
+      setShowCompletionModal(true)
+    }, 2500)
   }
 
   function handleRestart() {
+    clearCompletionTimer()
     setShowCompletionModal(false)
     setGameState(createGameState(levels[activeLevelIndex]))
   }
 
   function handleSelectLevel(levelIndex: number) {
     const selectedLevel = levels[levelIndex]
-
     if (selectedLevel.id > progress.highestUnlockedLevelId) return
-
+    clearCompletionTimer()
     setShowCompletionModal(false)
     setActiveLevelIndex(levelIndex)
     setGameState(createGameState(selectedLevel))
@@ -67,6 +76,7 @@ function App() {
       nextLevel.id,
     )
 
+    clearCompletionTimer()
     setShowCompletionModal(false)
     setProgress(updatedProgress)
     setActiveLevelIndex(nextLevelIndex)
@@ -74,11 +84,11 @@ function App() {
   }
 
   if (!hasStartedGame) {
-    return <OnboardingScreen onStart={() => setHasStartedGame(true)} />
+    return <LandingPage onStart={() => setHasStartedGame(true)} />
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-8 text-slate-100">
+    <div className="flex min-h-screen flex-col">
       {showCompletionModal && levelScore && (
         <CompletionModal
           levelName={gameState.level.name}
@@ -93,144 +103,235 @@ function App() {
         />
       )}
 
-      <section className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[1fr_340px]">
-        <div>
-          <p className="mb-4 inline-flex rounded-full border border-cyan-400/30 bg-cyan-400/10 px-4 py-2 text-sm font-medium text-cyan-300">
-            Network Routing Puzzle
+      {/* Nav bar */}
+      <nav className="flex shrink-0 items-center border-b border-[#1e1c18] px-6 py-3">
+        <span className="text-sm font-semibold text-[#c8c0b4]">PacketPath</span>
+        <span className="mx-2.5 text-[#2c2926]">·</span>
+        <span className="text-xs uppercase tracking-[0.18em] text-[#4a4540]">
+          Network Routing Puzzle
+        </span>
+      </nav>
+
+      {/* Three-column main content */}
+      <div className="flex min-h-0 flex-1">
+
+        {/* Left column — ambient context */}
+        <div className="flex w-72 shrink-0 flex-col justify-center border-r border-[#1e1c18] px-8 py-12">
+          <h1 className="text-4xl font-bold leading-tight tracking-tight text-[#e8e2d8]">
+            Guide the packet.
+          </h1>
+          <p className="mt-1 text-4xl font-bold leading-tight tracking-tight text-amber-400">
+            Solve the route.
           </p>
-
-          <h1 className="text-5xl font-bold tracking-tight">PacketPath</h1>
-
-          <p className="mt-4 max-w-2xl text-slate-300">
-            Rotate network tiles to restore a route from the source server to the destination.
-            Avoid firewalls and complete the path in as few moves as possible.
+          <p className="mt-6 text-sm leading-6 text-[#4a4540]">
+            Rotate network tiles to connect the source to the destination. Avoid firewalls and
+            complete the path in as few moves as possible.
           </p>
+        </div>
 
-          <div className="mt-8">
-            <GameBoard gameState={gameState} onRotateTile={handleRotateTile} />
+        {/* Center column — board + legend + level selector */}
+        <div className="flex flex-1 flex-col items-center justify-center gap-5 overflow-auto px-6 py-8">
+          <GameBoard
+            gameState={gameState}
+            onRotateTile={handleRotateTile}
+            onPacketAnimationComplete={handlePacketAnimationComplete}
+          />
+
+          {/* Celebration card */}
+          {isCelebrating && levelScore && (
+            <div className="celebration-card-in flex w-full max-w-[576px] items-center gap-6 rounded-2xl border border-emerald-800/25 bg-emerald-950/20 px-6 py-4">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-400/60">
+                  Signal delivered
+                </p>
+                <p className="mt-1 text-4xl font-bold tabular-nums text-[#e8e2d8]">
+                  {levelScore.score}
+                </p>
+                <p className="mt-0.5 text-xs text-[#3a3530]">/ {maxLevelScore} pts</p>
+              </div>
+              <div className="ml-auto text-right">
+                <p className="text-xl text-amber-400">
+                  {levelScore.rating === 'Excellent' ? '★★★' : levelScore.rating === 'Efficient' ? '★★' : '★'}
+                </p>
+                <p className="mt-1 text-sm font-medium text-[#c8c0b4]">{levelScore.rating}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Legend */}
+          <div className="flex items-center gap-6 text-xs text-[#4a4540]">
+            <span className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full border border-amber-500/40 bg-[#1a1408]" />
+              Source
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full border border-sky-400/30 bg-[#0c1219]" />
+              Destination
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block h-0.5 w-4 rounded bg-[#4a4540]" />
+              Cable
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="flex h-3 w-3 items-center justify-center rounded border border-rose-500/30 bg-[#1a0d0d] text-[8px] leading-none text-rose-400/60">
+                ×
+              </span>
+              Firewall
+            </span>
+          </div>
+
+          {/* Level selector */}
+          <div className="w-full max-w-[576px]">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#3a3530]">
+              Levels
+            </p>
+            <LevelSelector
+              levels={levels}
+              activeLevelId={gameState.level.id}
+              progress={progress}
+              onSelectLevel={handleSelectLevel}
+            />
           </div>
         </div>
 
-        <div className="space-y-6">
-          <aside className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 shadow-2xl shadow-cyan-950/30">
-            <p className="text-sm font-medium uppercase tracking-[0.3em] text-cyan-300">
+        {/* Right panel — stats + controls */}
+        <aside className="flex w-80 shrink-0 flex-col overflow-y-auto border-l border-[#1e1c18]">
+          <div className="flex-1 px-8 py-10">
+
+            {/* Level identity */}
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-500/80">
               Level {gameState.level.id} of {levels.length}
             </p>
+            <h2 className="mt-2 text-2xl font-bold text-[#e8e2d8]">
+              {gameState.level.name}
+            </h2>
 
-            <h2 className="mt-3 text-2xl font-bold">{gameState.level.name}</h2>
+            {/* Meta pills */}
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="flex items-center gap-1.5 rounded-full border border-[#252220] bg-[#1a1814] px-3 py-1 text-xs text-[#6b6460]">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500/70" />
+                {gameState.level.difficulty}
+              </span>
+              <span className="rounded-full border border-[#252220] bg-[#1a1814] px-3 py-1 text-xs text-[#6b6460]">
+                {gameState.level.estimatedMoves} moves target
+              </span>
+              <span className="rounded-full border border-[#252220] bg-[#1a1814] px-3 py-1 text-xs text-[#6b6460]">
+                {gameState.level.category}
+              </span>
+            </div>
 
-            <p className="mt-3 text-sm leading-6 text-slate-300">
-              {gameState.level.description}
-            </p>
+            <div className="mt-8 border-t border-[#1e1c18]" />
 
-            <div className="mt-5 grid grid-cols-3 gap-3">
-              <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-3">
-                <p className="text-xs text-slate-500">Difficulty</p>
-                <p className="mt-1 text-sm font-bold text-cyan-300">
-                  {gameState.level.difficulty}
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-3">
-                <p className="text-xs text-slate-500">Target</p>
-                <p className="mt-1 text-sm font-bold">
-                  {gameState.level.estimatedMoves} moves
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-3">
-                <p className="text-xs text-slate-500">Type</p>
-                <p className="mt-1 text-sm font-bold">
-                  {gameState.level.category}
-                </p>
+            {/* Moves */}
+            <div className="mt-6">
+              <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#3a3530]">
+                Moves
+              </p>
+              <div className="mt-2 flex items-baseline gap-3">
+                <span className="text-5xl font-bold tabular-nums text-[#e8e2d8]">
+                  {String(gameState.moves).padStart(2, '0')}
+                </span>
+                {currentLevelProgress && (
+                  <span className="text-xs text-[#4a4540]">
+                    Best: {currentLevelProgress.bestMoves}
+                  </span>
+                )}
               </div>
             </div>
 
-            <div className="mt-8 grid gap-4">
-              <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
-                <p className="text-sm text-slate-400">Moves</p>
-                <p className="mt-1 text-3xl font-bold">{gameState.moves}</p>
-              </div>
-
-              <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
-                <p className="text-sm text-slate-400">Status</p>
-                <p className="mt-1 text-xl font-semibold">
+            {/* Status */}
+            <div className="mt-6">
+              <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#3a3530]">
+                Status
+              </p>
+              <div className="mt-2 flex items-center gap-2">
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${
+                    gameState.status === 'completed' ? 'bg-emerald-400' : 'bg-[#3a3530]'
+                  }`}
+                />
+                <span
+                  className={`text-sm font-medium ${
+                    gameState.status === 'completed' ? 'text-emerald-400' : 'text-[#5a5550]'
+                  }`}
+                >
                   {gameState.status === 'completed' ? 'Route restored' : 'Routing in progress'}
-                </p>
+                </span>
               </div>
-
-              {levelScore && (
-                <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
-                  <p className="text-sm text-slate-400">Score</p>
-                  <p className="mt-1 text-3xl font-bold">{levelScore.score}</p>
-                  <p className="mt-1 text-sm font-semibold text-cyan-300">
-                    {levelScore.rating}
-                  </p>
-                  <p className="mt-2 text-xs text-slate-500">
-                    Minimum to advance: 700
-                  </p>
-                </div>
-              )}
-
-              {currentLevelProgress && (
-                <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
-                  <p className="text-sm text-slate-400">Best Result</p>
-                  <p className="mt-1 text-xl font-bold">
-                    {currentLevelProgress.bestScore} pts
-                  </p>
-                  <p className="mt-1 text-sm text-slate-400">
-                    Best moves: {currentLevelProgress.bestMoves}
-                  </p>
-                </div>
-              )}
             </div>
 
-            {gameState.status === 'completed' && (
-              <div
-                className={`mt-6 rounded-2xl border p-4 ${
-                  levelScore?.canAdvance
-                    ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200'
-                    : 'border-yellow-400/30 bg-yellow-400/10 text-yellow-100'
-                }`}
-              >
-                {levelScore?.canAdvance
-                  ? hasNextLevel
-                    ? 'Nice work. You scored high enough to unlock the next route.'
-                    : 'Great job. You restored every route.'
-                  : 'Route restored, but your score is too low. Restart the level and solve it in fewer moves to advance.'}
+            {/* Score */}
+            {levelScore && (
+              <div className="mt-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#3a3530]">
+                  Score
+                </p>
+                <div className="mt-2 flex items-baseline gap-2">
+                  <span className="text-4xl font-bold text-[#e8e2d8]">{levelScore.score}</span>
+                  <span className="text-sm text-[#3a3530]">/ {maxLevelScore}</span>
+                  <span className="ml-auto text-xs font-semibold text-amber-400">
+                    {levelScore.rating} ★
+                  </span>
+                </div>
+                <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-[#1e1c18]">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-amber-600 to-amber-400 transition-all duration-700"
+                    style={{
+                      width: `${Math.min(100, (levelScore.score / maxLevelScore) * 100)}%`,
+                    }}
+                  />
+                </div>
+                <p className="mt-2 text-xs text-[#3a3530]">Minimum to advance: 700</p>
               </div>
             )}
 
-            <div className="mt-6 grid gap-3">
-              {gameState.status === 'completed' && hasNextLevel && levelScore?.canAdvance && (
-                <button
-                  type="button"
-                  onClick={handleNextLevel}
-                  className="w-full rounded-xl bg-emerald-400 px-5 py-3 font-semibold text-slate-950 shadow-lg shadow-emerald-400/20 transition hover:bg-emerald-300"
-                >
-                  Next Level
-                </button>
-              )}
+            {/* Completion banner */}
+            {gameState.status === 'completed' && (
+              <div
+                className={`mt-6 flex items-start gap-2.5 rounded-xl border p-4 text-sm leading-5 ${
+                  levelScore?.canAdvance
+                    ? 'border-emerald-800/30 bg-emerald-950/20 text-emerald-400'
+                    : 'border-amber-800/30 bg-amber-950/20 text-amber-400'
+                }`}
+              >
+                <span className="mt-px shrink-0 text-base leading-none">
+                  {levelScore?.canAdvance ? '✓' : '!'}
+                </span>
+                <span>
+                  {levelScore?.canAdvance
+                    ? hasNextLevel
+                      ? 'Nice work. You scored high enough to unlock the next route.'
+                      : 'Great job. You restored every route.'
+                    : 'Score too low to advance. Restart and solve in fewer moves.'}
+                </span>
+              </div>
+            )}
+          </div>
 
+          {/* Action buttons */}
+          <div className="shrink-0 space-y-2 border-t border-[#1e1c18] px-8 py-6">
+            {gameState.status === 'completed' && hasNextLevel && levelScore?.canAdvance && (
               <button
                 type="button"
-                onClick={handleRestart}
-                className="w-full rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 shadow-lg shadow-cyan-400/20 transition hover:bg-cyan-300"
+                onClick={handleNextLevel}
+                className="flex w-full items-center justify-between rounded-xl bg-emerald-900/50 px-5 py-3.5 font-semibold text-emerald-300 transition hover:bg-emerald-800/50"
               >
-                Restart Level
+                Next Level
+                <span aria-hidden>›</span>
               </button>
-            </div>
-          </aside>
-
-          <LevelSelector
-            levels={levels}
-            activeLevelId={gameState.level.id}
-            progress={progress}
-            onSelectLevel={handleSelectLevel}
-          />
-        </div>
-      </section>
-    </main>
+            )}
+            <button
+              type="button"
+              onClick={handleRestart}
+              className="flex w-full items-center justify-between rounded-xl border border-[#252220] px-5 py-3.5 font-semibold text-[#6b6460] transition hover:border-[#403c36] hover:text-[#c8c0b4]"
+            >
+              Restart Level
+              <span aria-hidden className="text-sm">↺</span>
+            </button>
+          </div>
+        </aside>
+      </div>
+    </div>
   )
 }
 
