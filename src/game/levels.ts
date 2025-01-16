@@ -154,4 +154,313 @@ export const levels: Level[] = [
       ],
     ],
   },
+
+  // ── Level 4 ──────────────────────────────────────────────────────────────
+  // Solution path: (1,0)→(1,1)→(1,2)→(1,3)→(2,3)→(2,4)
+  // Moves needed: (1,1)str 0→90 +1, (1,2)str 0→90 +1, (1,3)cor 0→180 +2, (2,3)cor 270→0 +1 = 5
+  {
+    id: 4,
+    name: 'Subnet Shift',
+    description: 'A short detour through a subnet junction brings the packet to its next hop.',
+    difficulty: 'Medium',
+    estimatedMoves: 5,
+    category: 'Subnet Routing',
+    rows: 5,
+    cols: 5,
+    tiles: [
+      [
+        tile('0-0', 'empty'),
+        tile('0-1', 'empty'),
+        tile('0-2', 'empty'),
+        tile('0-3', 'empty'),
+        tile('0-4', 'empty'),
+      ],
+      [
+        tile('1-0', 'source', 90, true),
+        tile('1-1', 'straight', 0),
+        tile('1-2', 'straight', 0),
+        tile('1-3', 'corner', 0),
+        tile('1-4', 'empty'),
+      ],
+      [
+        tile('2-0', 'empty'),
+        tile('2-1', 'firewall', 0, true),
+        tile('2-2', 'empty'),
+        tile('2-3', 'corner', 270),
+        tile('2-4', 'destination', 270, true),
+      ],
+      [
+        tile('3-0', 'empty'),
+        tile('3-1', 'empty'),
+        tile('3-2', 'straight', 0),
+        tile('3-3', 'empty'),
+        tile('3-4', 'empty'),
+      ],
+      [
+        tile('4-0', 'empty'),
+        tile('4-1', 'empty'),
+        tile('4-2', 'empty'),
+        tile('4-3', 'empty'),
+        tile('4-4', 'empty'),
+      ],
+    ],
+  },
+
+  // ── Level 5 ──────────────────────────────────────────────────────────────
+  // Solution path: (2,0)→(2,1)→(2,2)→(1,2)→(1,3)→(1,4)
+  // Moves needed: (2,1)str 0→90 +1, (2,2)cor 90→270 +2, (1,2)cor 0→90 +1, (1,3)str 0→90 +1 = 5
+  {
+    id: 5,
+    name: 'Proxy Bend',
+    description: 'The packet must bend upward through a proxy relay before reaching its destination.',
+    difficulty: 'Medium',
+    estimatedMoves: 5,
+    category: 'Subnet Routing',
+    rows: 5,
+    cols: 5,
+    tiles: [
+      [
+        tile('0-0', 'empty'),
+        tile('0-1', 'empty'),
+        tile('0-2', 'empty'),
+        tile('0-3', 'empty'),
+        tile('0-4', 'empty'),
+      ],
+      [
+        tile('1-0', 'empty'),
+        tile('1-1', 'firewall', 0, true),
+        tile('1-2', 'corner', 0),
+        tile('1-3', 'straight', 0),
+        tile('1-4', 'destination', 270, true),
+      ],
+      [
+        tile('2-0', 'source', 90, true),
+        tile('2-1', 'straight', 0),
+        tile('2-2', 'corner', 90),
+        tile('2-3', 'corner', 0),
+        tile('2-4', 'empty'),
+      ],
+      [
+        tile('3-0', 'empty'),
+        tile('3-1', 'empty'),
+        tile('3-2', 'empty'),
+        tile('3-3', 'empty'),
+        tile('3-4', 'empty'),
+      ],
+      [
+        tile('4-0', 'empty'),
+        tile('4-1', 'empty'),
+        tile('4-2', 'empty'),
+        tile('4-3', 'empty'),
+        tile('4-4', 'empty'),
+      ],
+    ],
+  },
+
+  // ── Level 6 ──────────────────────────────────────────────────────────────
+  // Solution path: (0,1)→(0,2)→(0,3)→(1,3)→(2,3)→(2,4)
+  // Moves needed: (0,2)str 0→90 +1, (0,3)cor 0→180 +2, (1,3)str 90→0 +1, (2,3)cor 180→0 +2 = 6
+  {
+    id: 6,
+    name: 'Firewall Maze',
+    description: 'Two active firewalls narrow the viable route to a single compliant path.',
+    difficulty: 'Medium',
+    estimatedMoves: 6,
+    category: 'Firewall Detour',
+    rows: 5,
+    cols: 5,
+    tiles: [
+      [
+        tile('0-0', 'empty'),
+        tile('0-1', 'source', 90, true),
+        tile('0-2', 'straight', 0),
+        tile('0-3', 'corner', 0),
+        tile('0-4', 'empty'),
+      ],
+      [
+        tile('1-0', 'empty'),
+        tile('1-1', 'empty'),
+        tile('1-2', 'firewall', 0, true),
+        tile('1-3', 'straight', 90),
+        tile('1-4', 'empty'),
+      ],
+      [
+        tile('2-0', 'empty'),
+        tile('2-1', 'empty'),
+        tile('2-2', 'firewall', 0, true),
+        tile('2-3', 'corner', 180),
+        tile('2-4', 'destination', 270, true),
+      ],
+      [
+        tile('3-0', 'empty'),
+        tile('3-1', 'empty'),
+        tile('3-2', 'empty'),
+        tile('3-3', 'corner', 0),
+        tile('3-4', 'empty'),
+      ],
+      [
+        tile('4-0', 'empty'),
+        tile('4-1', 'empty'),
+        tile('4-2', 'empty'),
+        tile('4-3', 'empty'),
+        tile('4-4', 'empty'),
+      ],
+    ],
+  },
+
+  // ── Level 7 ──────────────────────────────────────────────────────────────
+  // Solution path: (0,0)→(1,0)→(2,0)→(2,1)→(2,2)→(2,3)→(1,3)→(1,4)
+  // Moves needed: (1,0)str 90→0 +1, (2,0)cor 270→0 +1, (2,1)str 0→90 +1,
+  //               (2,2)str 0→90 +1, (2,3)cor 90→270 +2, (1,3)cor 0→90 +1 = 7
+  {
+    id: 7,
+    name: 'Backbone Segment',
+    description: 'Trace the packet along the network backbone and make the final turn to reach the destination.',
+    difficulty: 'Medium',
+    estimatedMoves: 7,
+    category: 'Backbone Path',
+    rows: 5,
+    cols: 5,
+    tiles: [
+      [
+        tile('0-0', 'source', 180, true),
+        tile('0-1', 'empty'),
+        tile('0-2', 'empty'),
+        tile('0-3', 'empty'),
+        tile('0-4', 'empty'),
+      ],
+      [
+        tile('1-0', 'straight', 90),
+        tile('1-1', 'firewall', 0, true),
+        tile('1-2', 'empty'),
+        tile('1-3', 'corner', 0),
+        tile('1-4', 'destination', 270, true),
+      ],
+      [
+        tile('2-0', 'corner', 270),
+        tile('2-1', 'straight', 0),
+        tile('2-2', 'straight', 0),
+        tile('2-3', 'corner', 90),
+        tile('2-4', 'empty'),
+      ],
+      [
+        tile('3-0', 'empty'),
+        tile('3-1', 'firewall', 0, true),
+        tile('3-2', 'empty'),
+        tile('3-3', 'empty'),
+        tile('3-4', 'empty'),
+      ],
+      [
+        tile('4-0', 'empty'),
+        tile('4-1', 'empty'),
+        tile('4-2', 'empty'),
+        tile('4-3', 'empty'),
+        tile('4-4', 'empty'),
+      ],
+    ],
+  },
+
+  // ── Level 8 ──────────────────────────────────────────────────────────────
+  // Solution path: (3,0)→(2,0)→(1,0)→(1,1)→(1,2)→(2,2)→(2,3)→(2,4)
+  // Moves needed: (2,0)str 90→0 +1, (1,0)cor 0→90 +1, (1,1)str 0→90 +1,
+  //               (1,2)cor 90→180 +1, (2,2)cor 180→0 +2, (2,3)str 0→90 +1 = 7
+  {
+    id: 8,
+    name: 'Encrypted Channel',
+    description: 'Route through a secure tunnel segment that doubles back before reaching the endpoint.',
+    difficulty: 'Medium',
+    estimatedMoves: 7,
+    category: 'Secure Channel',
+    rows: 5,
+    cols: 5,
+    tiles: [
+      [
+        tile('0-0', 'empty'),
+        tile('0-1', 'empty'),
+        tile('0-2', 'firewall', 0, true),
+        tile('0-3', 'corner', 0),
+        tile('0-4', 'empty'),
+      ],
+      [
+        tile('1-0', 'corner', 0),
+        tile('1-1', 'straight', 0),
+        tile('1-2', 'corner', 90),
+        tile('1-3', 'empty'),
+        tile('1-4', 'empty'),
+      ],
+      [
+        tile('2-0', 'straight', 90),
+        tile('2-1', 'firewall', 0, true),
+        tile('2-2', 'corner', 180),
+        tile('2-3', 'straight', 0),
+        tile('2-4', 'destination', 270, true),
+      ],
+      [
+        tile('3-0', 'source', 0, true),
+        tile('3-1', 'empty'),
+        tile('3-2', 'empty'),
+        tile('3-3', 'empty'),
+        tile('3-4', 'empty'),
+      ],
+      [
+        tile('4-0', 'empty'),
+        tile('4-1', 'empty'),
+        tile('4-2', 'empty'),
+        tile('4-3', 'empty'),
+        tile('4-4', 'empty'),
+      ],
+    ],
+  },
+
+  // ── Level 9 ──────────────────────────────────────────────────────────────
+  // Solution path: (0,0)→(1,0)→(2,0)→(2,1)→(2,2)→(2,3)→(2,4)→(3,4)→(4,4)
+  // Moves needed: (1,0)str 90→0 +1, (2,0)cor 270→0 +1, (2,1)str 0→90 +1,
+  //               (2,2)str 0→90 +1, (2,3)str 0→90 +1, (2,4)cor 0→180 +2, (3,4)str 90→0 +1 = 8
+  {
+    id: 9,
+    name: 'Data Relay',
+    description: 'A long-haul path crosses the full width of the network before terminating at the relay exit.',
+    difficulty: 'Medium',
+    estimatedMoves: 8,
+    category: 'Backbone Path',
+    rows: 5,
+    cols: 5,
+    tiles: [
+      [
+        tile('0-0', 'source', 180, true),
+        tile('0-1', 'empty'),
+        tile('0-2', 'empty'),
+        tile('0-3', 'empty'),
+        tile('0-4', 'empty'),
+      ],
+      [
+        tile('1-0', 'straight', 90),
+        tile('1-1', 'firewall', 0, true),
+        tile('1-2', 'empty'),
+        tile('1-3', 'corner', 0),
+        tile('1-4', 'empty'),
+      ],
+      [
+        tile('2-0', 'corner', 270),
+        tile('2-1', 'straight', 0),
+        tile('2-2', 'straight', 0),
+        tile('2-3', 'straight', 0),
+        tile('2-4', 'corner', 0),
+      ],
+      [
+        tile('3-0', 'empty'),
+        tile('3-1', 'empty'),
+        tile('3-2', 'empty'),
+        tile('3-3', 'firewall', 0, true),
+        tile('3-4', 'straight', 90),
+      ],
+      [
+        tile('4-0', 'empty'),
+        tile('4-1', 'empty'),
+        tile('4-2', 'empty'),
+        tile('4-3', 'empty'),
+        tile('4-4', 'destination', 0, true),
+      ],
+    ],
+  },
 ]
