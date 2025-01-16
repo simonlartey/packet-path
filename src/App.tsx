@@ -115,18 +115,28 @@ function App() {
       {/* Three-column main content */}
       <div className="flex min-h-0 flex-1">
 
-        {/* Left column — ambient context */}
-        <div className="flex w-72 shrink-0 flex-col justify-center border-r border-[#1e1c18] px-8 py-12">
-          <h1 className="text-4xl font-bold leading-tight tracking-tight text-[#e8e2d8]">
-            Guide the packet.
-          </h1>
-          <p className="mt-1 text-4xl font-bold leading-tight tracking-tight text-amber-400">
-            Solve the route.
-          </p>
-          <p className="mt-6 text-sm leading-6 text-[#4a4540]">
-            Rotate network tiles to connect the source to the destination. Avoid firewalls and
-            complete the path in as few moves as possible.
-          </p>
+        {/* Left column — title + campaign selector */}
+        <div className="flex w-72 shrink-0 flex-col border-r border-[#1e1c18] px-6 py-8">
+          <div className="shrink-0">
+            <h1 className="text-3xl font-bold leading-tight tracking-tight text-[#e8e2d8]">
+              Guide the packet.
+            </h1>
+            <p className="mt-1 text-3xl font-bold leading-tight tracking-tight text-amber-400">
+              Solve the route.
+            </p>
+            <p className="mt-4 text-sm leading-6 text-[#4a4540]">
+              Rotate tiles to connect source to destination. Avoid firewalls.
+            </p>
+          </div>
+
+          <div className="mt-6">
+            <LevelSelector
+              levels={levels}
+              activeLevelId={gameState.level.id}
+              progress={progress}
+              onSelectLevel={handleSelectLevel}
+            />
+          </div>
         </div>
 
         {/* Center column — board + legend + level selector */}
@@ -180,18 +190,6 @@ function App() {
             </span>
           </div>
 
-          {/* Level selector */}
-          <div className="w-full max-w-[576px]">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#3a3530]">
-              Levels
-            </p>
-            <LevelSelector
-              levels={levels}
-              activeLevelId={gameState.level.id}
-              progress={progress}
-              onSelectLevel={handleSelectLevel}
-            />
-          </div>
         </div>
 
         {/* Right panel — stats + controls */}
