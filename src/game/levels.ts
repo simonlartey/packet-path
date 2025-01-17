@@ -463,4 +463,215 @@ export const levels: Level[] = [
       ],
     ],
   },
+
+  // ── Level 10 ─────────────────────────────────────────────────────────────
+  // Solution path: (4,0)→(3,0)→(2,0)→(1,0)→(1,1)→(1,2)→(1,3)→(1,4)→(2,4)→(3,4)
+  // Moves: (3,0)str 90→0 +1, (2,0)str 90→0 +1, (1,0)cor 270→90 +2,
+  //        (1,1)str 0→90 +1, (1,2)str 0→90 +1, (1,3)str 0→90 +1,
+  //        (1,4)cor 0→180 +2, (2,4)str 90→0 +1 = 10
+  {
+    id: 10,
+    name: 'Zero Trust Corridor',
+    description: 'Every hop is scrutinised — route the packet along the only compliant path through the segment.',
+    difficulty: 'Hard',
+    estimatedMoves: 10,
+    category: 'Secure Channel',
+    rows: 5,
+    cols: 5,
+    tiles: [
+      [
+        tile('0-0', 'empty'),
+        tile('0-1', 'empty'),
+        tile('0-2', 'empty'),
+        tile('0-3', 'empty'),
+        tile('0-4', 'empty'),
+      ],
+      [
+        tile('1-0', 'corner', 270),
+        tile('1-1', 'straight', 0),
+        tile('1-2', 'straight', 0),
+        tile('1-3', 'straight', 0),
+        tile('1-4', 'corner', 0),
+      ],
+      [
+        tile('2-0', 'straight', 90),
+        tile('2-1', 'firewall', 0, true),
+        tile('2-2', 'empty'),
+        tile('2-3', 'empty'),
+        tile('2-4', 'straight', 90),
+      ],
+      [
+        tile('3-0', 'straight', 90),
+        tile('3-1', 'empty'),
+        tile('3-2', 'firewall', 0, true),
+        tile('3-3', 'corner', 0),
+        tile('3-4', 'destination', 0, true),
+      ],
+      [
+        tile('4-0', 'source', 0, true),
+        tile('4-1', 'empty'),
+        tile('4-2', 'empty'),
+        tile('4-3', 'empty'),
+        tile('4-4', 'empty'),
+      ],
+    ],
+  },
+
+  // ── Level 11 ─────────────────────────────────────────────────────────────
+  // Solution path: (0,2)→(1,2)→(2,2)→(2,3)→(2,4)→(3,4)→(4,4)→(4,3)→(4,2)
+  // Moves: (1,2)str 90→0 +1, (2,2)cor 180→0 +2, (2,3)str 0→90 +1,
+  //        (2,4)cor 0→180 +2, (3,4)str 90→0 +1, (4,4)cor 90→270 +2, (4,3)str 0→90 +1 = 10
+  {
+    id: 11,
+    name: 'Signal Bounce',
+    description: 'The signal must change direction three times before it can reach the endpoint.',
+    difficulty: 'Hard',
+    estimatedMoves: 10,
+    category: 'Backbone Path',
+    rows: 5,
+    cols: 5,
+    tiles: [
+      [
+        tile('0-0', 'empty'),
+        tile('0-1', 'empty'),
+        tile('0-2', 'source', 180, true),
+        tile('0-3', 'empty'),
+        tile('0-4', 'empty'),
+      ],
+      [
+        tile('1-0', 'empty'),
+        tile('1-1', 'empty'),
+        tile('1-2', 'straight', 90),
+        tile('1-3', 'firewall', 0, true),
+        tile('1-4', 'empty'),
+      ],
+      [
+        tile('2-0', 'empty'),
+        tile('2-1', 'firewall', 0, true),
+        tile('2-2', 'corner', 180),
+        tile('2-3', 'straight', 0),
+        tile('2-4', 'corner', 0),
+      ],
+      [
+        tile('3-0', 'empty'),
+        tile('3-1', 'empty'),
+        tile('3-2', 'firewall', 0, true),
+        tile('3-3', 'empty'),
+        tile('3-4', 'straight', 90),
+      ],
+      [
+        tile('4-0', 'empty'),
+        tile('4-1', 'empty'),
+        tile('4-2', 'destination', 90, true),
+        tile('4-3', 'straight', 0),
+        tile('4-4', 'corner', 90),
+      ],
+    ],
+  },
+
+  // ── Level 12 ─────────────────────────────────────────────────────────────
+  // Solution path: (4,1)→(3,1)→(2,1)→(1,1)→(1,2)→(1,3)→(1,4)→(2,4)→(3,4)→(4,4)
+  // Moves: (3,1)str 90→0 +1, (2,1)str 90→0 +1, (1,1)cor 270→90 +2,
+  //        (1,2)str 0→90 +1, (1,3)str 0→90 +1, (1,4)cor 0→180 +2,
+  //        (2,4)str 90→0 +1, (3,4)str 90→0 +1 = 10
+  {
+    id: 12,
+    name: 'Reroute Protocol',
+    description: 'Firewalls seal every direct line — find the long way round to restore the connection.',
+    difficulty: 'Hard',
+    estimatedMoves: 10,
+    category: 'Firewall Detour',
+    rows: 5,
+    cols: 5,
+    tiles: [
+      [
+        tile('0-0', 'empty'),
+        tile('0-1', 'empty'),
+        tile('0-2', 'empty'),
+        tile('0-3', 'empty'),
+        tile('0-4', 'empty'),
+      ],
+      [
+        tile('1-0', 'empty'),
+        tile('1-1', 'corner', 270),
+        tile('1-2', 'straight', 0),
+        tile('1-3', 'straight', 0),
+        tile('1-4', 'corner', 0),
+      ],
+      [
+        tile('2-0', 'firewall', 0, true),
+        tile('2-1', 'straight', 90),
+        tile('2-2', 'firewall', 0, true),
+        tile('2-3', 'empty'),
+        tile('2-4', 'straight', 90),
+      ],
+      [
+        tile('3-0', 'empty'),
+        tile('3-1', 'straight', 90),
+        tile('3-2', 'firewall', 0, true),
+        tile('3-3', 'empty'),
+        tile('3-4', 'straight', 90),
+      ],
+      [
+        tile('4-0', 'empty'),
+        tile('4-1', 'source', 0, true),
+        tile('4-2', 'empty'),
+        tile('4-3', 'empty'),
+        tile('4-4', 'destination', 0, true),
+      ],
+    ],
+  },
+
+  // ── Level 13 ─────────────────────────────────────────────────────────────
+  // Solution path: (4,4)→(4,3)→(4,2)→(3,2)→(2,2)→(1,2)→(1,1)→(1,0)→(2,0)→(3,0)→(4,0)
+  // Moves: (4,3)str 0→90 +1, (4,2)cor 270→0 +1, (3,2)str 90→0 +1,
+  //        (2,2)str 90→0 +1, (1,2)cor 0→180 +2, (1,1)str 0→90 +1,
+  //        (1,0)cor 270→90 +2, (2,0)str 90→0 +1, (3,0)str 90→0 +1 = 11
+  {
+    id: 13,
+    name: 'Deep Packet Inspection',
+    description: 'The route snakes through the full grid — trace every segment carefully before committing.',
+    difficulty: 'Hard',
+    estimatedMoves: 11,
+    category: 'Expert Route',
+    rows: 5,
+    cols: 5,
+    tiles: [
+      [
+        tile('0-0', 'empty'),
+        tile('0-1', 'empty'),
+        tile('0-2', 'empty'),
+        tile('0-3', 'empty'),
+        tile('0-4', 'empty'),
+      ],
+      [
+        tile('1-0', 'corner', 270),
+        tile('1-1', 'straight', 0),
+        tile('1-2', 'corner', 0),
+        tile('1-3', 'firewall', 0, true),
+        tile('1-4', 'empty'),
+      ],
+      [
+        tile('2-0', 'straight', 90),
+        tile('2-1', 'firewall', 0, true),
+        tile('2-2', 'straight', 90),
+        tile('2-3', 'firewall', 0, true),
+        tile('2-4', 'empty'),
+      ],
+      [
+        tile('3-0', 'straight', 90),
+        tile('3-1', 'empty'),
+        tile('3-2', 'straight', 90),
+        tile('3-3', 'empty'),
+        tile('3-4', 'empty'),
+      ],
+      [
+        tile('4-0', 'destination', 0, true),
+        tile('4-1', 'empty'),
+        tile('4-2', 'corner', 270),
+        tile('4-3', 'straight', 0),
+        tile('4-4', 'source', 270, true),
+      ],
+    ],
+  },
 ]
