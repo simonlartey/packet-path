@@ -469,6 +469,8 @@ export const levels: Level[] = [
   // Moves: (3,0)str 90→0 +1, (2,0)str 90→0 +1, (1,0)cor 270→90 +2,
   //        (1,1)str 0→90 +1, (1,2)str 0→90 +1, (1,3)str 0→90 +1,
   //        (1,4)cor 0→180 +2, (2,4)str 90→0 +1 = 10
+  // Decoys: (0,1)cor — dead-end upper branch; (2,3)cor — false bridge toward (2,4);
+  //         (4,2)cor — bottom-row noise near source
   {
     id: 10,
     name: 'Zero Trust Corridor',
@@ -481,7 +483,7 @@ export const levels: Level[] = [
     tiles: [
       [
         tile('0-0', 'empty'),
-        tile('0-1', 'empty'),
+        tile('0-1', 'corner', 270),
         tile('0-2', 'empty'),
         tile('0-3', 'empty'),
         tile('0-4', 'empty'),
@@ -497,7 +499,7 @@ export const levels: Level[] = [
         tile('2-0', 'straight', 90),
         tile('2-1', 'firewall', 0, true),
         tile('2-2', 'empty'),
-        tile('2-3', 'empty'),
+        tile('2-3', 'corner', 0),
         tile('2-4', 'straight', 90),
       ],
       [
@@ -510,7 +512,7 @@ export const levels: Level[] = [
       [
         tile('4-0', 'source', 0, true),
         tile('4-1', 'empty'),
-        tile('4-2', 'empty'),
+        tile('4-2', 'corner', 90),
         tile('4-3', 'empty'),
         tile('4-4', 'empty'),
       ],
@@ -521,6 +523,9 @@ export const levels: Level[] = [
   // Solution path: (0,2)→(1,2)→(2,2)→(2,3)→(2,4)→(3,4)→(4,4)→(4,3)→(4,2)
   // Moves: (1,2)str 90→0 +1, (2,2)cor 180→0 +2, (2,3)str 0→90 +1,
   //        (2,4)cor 0→180 +2, (3,4)str 90→0 +1, (4,4)cor 90→270 +2, (4,3)str 0→90 +1 = 10
+  // Decoys: (1,1)cor — right→(1,2) initially, breaks when (1,2) rotated to 0;
+  //         (1,4)str — down→(2,4) initially, breaks when (2,4) rotated to 180;
+  //         (3,3)cor — down→(4,3) initially, breaks when (4,3) rotated to 90
   {
     id: 11,
     name: 'Signal Bounce',
@@ -540,10 +545,10 @@ export const levels: Level[] = [
       ],
       [
         tile('1-0', 'empty'),
-        tile('1-1', 'empty'),
+        tile('1-1', 'corner', 0),
         tile('1-2', 'straight', 90),
         tile('1-3', 'firewall', 0, true),
-        tile('1-4', 'empty'),
+        tile('1-4', 'straight', 0),
       ],
       [
         tile('2-0', 'empty'),
@@ -556,7 +561,7 @@ export const levels: Level[] = [
         tile('3-0', 'empty'),
         tile('3-1', 'empty'),
         tile('3-2', 'firewall', 0, true),
-        tile('3-3', 'empty'),
+        tile('3-3', 'corner', 180),
         tile('3-4', 'straight', 90),
       ],
       [
@@ -574,6 +579,9 @@ export const levels: Level[] = [
   // Moves: (3,1)str 90→0 +1, (2,1)str 90→0 +1, (1,1)cor 270→90 +2,
   //        (1,2)str 0→90 +1, (1,3)str 0→90 +1, (1,4)cor 0→180 +2,
   //        (2,4)str 90→0 +1, (3,4)str 90→0 +1 = 10
+  // Decoys: (0,4)str — down→(1,4) initially, breaks when (1,4) rotated to 180;
+  //         (2,3)cor — up→(1,3) and right→(2,4) initially, both break in solution;
+  //         (3,3)cor — right→(3,4) initially, breaks when (3,4) rotated to 0
   {
     id: 12,
     name: 'Reroute Protocol',
@@ -589,7 +597,7 @@ export const levels: Level[] = [
         tile('0-1', 'empty'),
         tile('0-2', 'empty'),
         tile('0-3', 'empty'),
-        tile('0-4', 'empty'),
+        tile('0-4', 'straight', 0),
       ],
       [
         tile('1-0', 'empty'),
@@ -602,14 +610,14 @@ export const levels: Level[] = [
         tile('2-0', 'firewall', 0, true),
         tile('2-1', 'straight', 90),
         tile('2-2', 'firewall', 0, true),
-        tile('2-3', 'empty'),
+        tile('2-3', 'corner', 0),
         tile('2-4', 'straight', 90),
       ],
       [
         tile('3-0', 'empty'),
         tile('3-1', 'straight', 90),
         tile('3-2', 'firewall', 0, true),
-        tile('3-3', 'empty'),
+        tile('3-3', 'corner', 90),
         tile('3-4', 'straight', 90),
       ],
       [
@@ -627,6 +635,9 @@ export const levels: Level[] = [
   // Moves: (4,3)str 0→90 +1, (4,2)cor 270→0 +1, (3,2)str 90→0 +1,
   //        (2,2)str 90→0 +1, (1,2)cor 0→180 +2, (1,1)str 0→90 +1,
   //        (1,0)cor 270→90 +2, (2,0)str 90→0 +1, (3,0)str 90→0 +1 = 11
+  // Decoys: (0,0)cor — down→(1,0) initially, breaks when (1,0) rotated to 90;
+  //         (3,1)cor — right→(3,2) initially, breaks when (3,2) rotated to 0;
+  //         (3,3)str — down→(4,3) initially, breaks when (4,3) rotated to 90
   {
     id: 13,
     name: 'Deep Packet Inspection',
@@ -638,7 +649,7 @@ export const levels: Level[] = [
     cols: 5,
     tiles: [
       [
-        tile('0-0', 'empty'),
+        tile('0-0', 'corner', 90),
         tile('0-1', 'empty'),
         tile('0-2', 'empty'),
         tile('0-3', 'empty'),
@@ -660,9 +671,9 @@ export const levels: Level[] = [
       ],
       [
         tile('3-0', 'straight', 90),
-        tile('3-1', 'empty'),
+        tile('3-1', 'corner', 90),
         tile('3-2', 'straight', 90),
-        tile('3-3', 'empty'),
+        tile('3-3', 'straight', 0),
         tile('3-4', 'empty'),
       ],
       [
