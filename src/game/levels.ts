@@ -745,4 +745,63 @@ export const levels: Level[] = [
       ],
     ],
   },
+
+  // ── Level 15 ─────────────────────────────────────────────────────────────
+  // Solution path: (4,0)→(3,0)→(2,0)→(1,0)→(0,0)→(0,1)→(0,2)→(0,3)→(1,3)→(2,3)→(2,4)→(1,4)→(0,4)
+  // Moves: (3,0)str 90→0 +1, (2,0)str 90→0 +1, (1,0)str 90→0 +1,
+  //        (0,0)cor 270→90 +2, (0,1)str 0→90 +1, (0,2)str 0→90 +1,
+  //        (0,3)cor 0→180 +2, (1,3)str 90→0 +1, (2,3)cor 180→0 +2,
+  //        (2,4)cor 90→270 +2, (1,4)str 90→0 +1 = 15
+  // Decoys: (1,2)cor and (2,2)str create a false central route;
+  //         (3,1)/(4,1)/(4,2) form a misleading lower branch near the source;
+  //         (3,4)/(4,4) create destination-side noise that never reaches the endpoint;
+  //         firewalls at (1,1), (2,1), (3,3), and (4,3) block shortcuts.
+  {
+    id: 15,
+    name: 'Proxy Labyrinth',
+    description:
+      'A dense proxy network hides the valid route among misleading branches and blocked shortcuts.',
+    difficulty: 'Hard',
+    estimatedMoves: 15,
+    category: 'Expert Route',
+    rows: 5,
+    cols: 5,
+    tiles: [
+      [
+        tile('0-0', 'corner', 270),
+        tile('0-1', 'straight', 0),
+        tile('0-2', 'straight', 0),
+        tile('0-3', 'corner', 0),
+        tile('0-4', 'destination', 180, true),
+      ],
+      [
+        tile('1-0', 'straight', 90),
+        tile('1-1', 'firewall', 0, true),
+        tile('1-2', 'corner', 180),
+        tile('1-3', 'straight', 90),
+        tile('1-4', 'straight', 90),
+      ],
+      [
+        tile('2-0', 'straight', 90),
+        tile('2-1', 'firewall', 0, true),
+        tile('2-2', 'straight', 0),
+        tile('2-3', 'corner', 180),
+        tile('2-4', 'corner', 90),
+      ],
+      [
+        tile('3-0', 'straight', 90),
+        tile('3-1', 'corner', 90),
+        tile('3-2', 'corner', 270),
+        tile('3-3', 'firewall', 0, true),
+        tile('3-4', 'straight', 0),
+      ],
+      [
+        tile('4-0', 'source', 0, true),
+        tile('4-1', 'straight', 0),
+        tile('4-2', 'corner', 270),
+        tile('4-3', 'firewall', 0, true),
+        tile('4-4', 'corner', 180),
+      ],
+    ],
+  },
 ]
