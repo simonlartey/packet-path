@@ -20,8 +20,12 @@ function App() {
   const hasNextLevel = activeLevelIndex < levels.length - 1
 
   const levelScore =
-    gameState.status === 'completed'
-      ? calculateLevelScore(gameState.level, gameState.moves)
+    gameState.status === 'completed' && gameState.completedAt !== null
+      ? calculateLevelScore(
+          gameState.level,
+          gameState.moves,
+          Math.floor((gameState.completedAt - gameState.startedAt) / 1000),
+        )
       : null
 
   const currentLevelProgress = progress.completedLevels[gameState.level.id]

@@ -40,4 +40,6 @@ export type GameState = {
   level: Level
   moves: number
   status: GameStatus
+  startedAt: number
+  completedAt: number | null
 }

@@ -6,6 +6,8 @@ export function createGameState(level: Level): GameState {
     level: structuredClone(level),
     moves: 0,
     status: 'playing',
+    startedAt: Date.now(),
+    completedAt: null,
   }
 }
 
@@ -22,6 +24,7 @@ export function rotateTile(state: GameState, row: number, col: number): GameStat
 
   if (hasValidPath(nextState.level)) {
     nextState.status = 'completed'
+    nextState.completedAt = Date.now()
   }
 
   return nextState

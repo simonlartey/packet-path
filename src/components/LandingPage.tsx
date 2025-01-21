@@ -12,7 +12,7 @@ type LandingPageProps = {
 function buildSolvedLevel1(): GameState {
   const level = structuredClone(levels[0])
   level.tiles[1][2].rotation = 180
-  return { level, moves: 0, status: 'completed' }
+  return { level, moves: 0, status: 'completed', startedAt: 0, completedAt: 0 }
 }
 
 const HERO_GAME_STATE = buildSolvedLevel1()
