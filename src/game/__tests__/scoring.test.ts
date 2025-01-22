@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { calculateLevelScore, MINIMUM_ADVANCE_SCORE } from '../scoring'
+import { calculateLevelScore } from '../scoring'
 import type { Level } from '../types'
 
 const testLevel: Level = {
@@ -22,17 +22,17 @@ describe('calculateLevelScore', () => {
     expect(fastScore.score).toBeGreaterThan(slowScore.score)
   })
 
-  it('allows progression when score meets the minimum threshold', () => {
-    const result = calculateLevelScore(testLevel, 2)
+  it('rates Excellent when score reaches 1000', () => {
+    const result = calculateLevelScore(testLevel, 1)
 
-    expect(result.score).toBeGreaterThanOrEqual(MINIMUM_ADVANCE_SCORE)
-    expect(result.canAdvance).toBe(true)
+    expect(result.score).toBeGreaterThanOrEqual(1000)
+    expect(result.rating).toBe('Excellent')
   })
 
-  it('blocks progression when score is below the minimum threshold', () => {
+  it('rates Complete when significantly over target moves', () => {
     const result = calculateLevelScore(testLevel, 8)
 
-    expect(result.score).toBeLessThan(MINIMUM_ADVANCE_SCORE)
-    expect(result.canAdvance).toBe(false)
+    expect(result.score).toBeLessThan(700)
+    expect(result.rating).toBe('Complete')
   })
 })

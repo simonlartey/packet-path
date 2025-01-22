@@ -5,10 +5,8 @@ export type PerformanceRating = 'Excellent' | 'Efficient' | 'Complete'
 export type LevelScore = {
   score: number
   rating: PerformanceRating
-  canAdvance: boolean
 }
 
-export const MINIMUM_ADVANCE_SCORE = 700
 
 const DIFFICULTY_BONUS: Record<Level['difficulty'], number> = {
   Easy: 0,
@@ -91,12 +89,12 @@ export function calculateLevelScore(
   const score = Math.max(100, Math.round(rawScore))
 
   if (score >= 1000) {
-    return { score, rating: 'Excellent', canAdvance: score >= MINIMUM_ADVANCE_SCORE }
+    return { score, rating: 'Excellent' }
   }
 
-  if (score >= MINIMUM_ADVANCE_SCORE) {
-    return { score, rating: 'Efficient', canAdvance: true }
+  if (score >= 700) {
+    return { score, rating: 'Efficient' }
   }
 
-  return { score, rating: 'Complete', canAdvance: false }
+  return { score, rating: 'Complete' }
 }

@@ -1,12 +1,14 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CompletionModal } from './components/CompletionModal'
 import { GameBoard } from './components/GameBoard'
 import { LandingPage } from './components/LandingPage'
 import { LevelSelector } from './components/LevelSelector'
+import { playCompletionSound, playTileRotateSound } from './audio/soundEffects'
 import { createGameState, rotateTile } from './game/engine'
 import { levels } from './game/levels'
 import { calculateLevelScore } from './game/scoring'
 import { loadProgress, saveLevelProgress } from './storage/progressStorage'
+import { loadSettings, saveSettings } from './storage/settingsStorage'
 
 function App() {
   const [hasStartedGame, setHasStartedGame] = useState(false)
@@ -15,7 +17,9 @@ function App() {
   const [progress, setProgress] = useState(() => loadProgress())
   const [showCompletionModal, setShowCompletionModal] = useState(false)
   const [isCelebrating, setIsCelebrating] = useState(false)
+  const [settings, setSettings] = useState(() => loadSettings())
   const completionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const prevStatusRef = useRef(gameState.status)
 
   const hasNextLevel = activeLevelIndex < levels.length - 1
 
@@ -39,8 +43,24 @@ function App() {
     setIsCelebrating(false)
   }
 
+  useEffect(() => {
+    if (prevStatusRef.current === 'playing' && gameState.status === 'completed') {
+      if (settings.soundEnabled) playCompletionSound()
+    }
+    prevStatusRef.current = gameState.status
+  }, [gameState.status, settings.soundEnabled])
+
   function handleRotateTile(row: number, col: number) {
+    if (settings.soundEnabled && gameState.status === 'playing') {
+      playTileRotateSound()
+    }
     setGameState((currentState) => rotateTile(currentState, row, col))
+  }
+
+  function handleToggleSound() {
+    const updated = { soundEnabled: !settings.soundEnabled }
+    setSettings(updated)
+    saveSettings(updated)
   }
 
   function handlePacketAnimationComplete() {
@@ -54,6 +74,10 @@ function App() {
 
   function handleRestart() {
     clearCompletionTimer()
+    if (gameState.status === 'completed' && levelScore) {
+      const updatedProgress = saveLevelProgress(gameState.level.id, levelScore.score, gameState.moves)
+      setProgress(updatedProgress)
+    }
     setShowCompletionModal(false)
     setGameState(createGameState(levels[activeLevelIndex]))
   }
@@ -68,7 +92,7 @@ function App() {
   }
 
   function handleNextLevel() {
-    if (!hasNextLevel || !levelScore?.canAdvance) return
+    if (!hasNextLevel || !levelScore) return
 
     const nextLevelIndex = activeLevelIndex + 1
     const nextLevel = levels[nextLevelIndex]
@@ -99,7 +123,6 @@ function App() {
           score={levelScore.score}
           moves={gameState.moves}
           rating={levelScore.rating}
-          canAdvance={levelScore.canAdvance}
           hasNextLevel={hasNextLevel}
           onNextLevel={handleNextLevel}
           onRetry={handleRestart}
@@ -114,6 +137,13 @@ function App() {
         <span className="text-xs uppercase tracking-[0.18em] text-[#4a4540]">
           Network Routing Puzzle
         </span>
+        <button
+          type="button"
+          onClick={handleToggleSound}
+          className="ml-auto rounded-lg border border-[#252220] px-3 py-1.5 text-xs text-[#4a4540] transition hover:border-[#403c36] hover:text-[#c8c0b4]"
+        >
+          {settings.soundEnabled ? 'Sound On' : 'Sound Off'}
+        </button>
       </nav>
 
       {/* Three-column main content */}
@@ -283,28 +313,17 @@ function App() {
                     }}
                   />
                 </div>
-                <p className="mt-2 text-xs text-[#3a3530]">Minimum to advance: 700</p>
               </div>
             )}
 
             {/* Completion banner */}
             {gameState.status === 'completed' && (
-              <div
-                className={`mt-6 flex items-start gap-2.5 rounded-xl border p-4 text-sm leading-5 ${
-                  levelScore?.canAdvance
-                    ? 'border-emerald-800/30 bg-emerald-950/20 text-emerald-400'
-                    : 'border-amber-800/30 bg-amber-950/20 text-amber-400'
-                }`}
-              >
-                <span className="mt-px shrink-0 text-base leading-none">
-                  {levelScore?.canAdvance ? '✓' : '!'}
-                </span>
+              <div className="mt-6 flex items-start gap-2.5 rounded-xl border border-emerald-800/30 bg-emerald-950/20 p-4 text-sm leading-5 text-emerald-400">
+                <span className="mt-px shrink-0 text-base leading-none">✓</span>
                 <span>
-                  {levelScore?.canAdvance
-                    ? hasNextLevel
-                      ? 'Nice work. You scored high enough to unlock the next route.'
-                      : 'Great job. You restored every route.'
-                    : 'Score too low to advance. Restart and solve in fewer moves.'}
+                  {hasNextLevel
+                    ? 'Nice work. You restored the route. Head to the next level.'
+                    : 'Great job. You restored every route.'}
                 </span>
               </div>
             )}
@@ -312,7 +331,7 @@ function App() {
 
           {/* Action buttons */}
           <div className="shrink-0 space-y-2 border-t border-[#1e1c18] px-8 py-6">
-            {gameState.status === 'completed' && hasNextLevel && levelScore?.canAdvance && (
+            {gameState.status === 'completed' && hasNextLevel && (
               <button
                 type="button"
                 onClick={handleNextLevel}

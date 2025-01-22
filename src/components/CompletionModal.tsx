@@ -5,7 +5,6 @@ type CompletionModalProps = {
   score: number
   moves: number
   rating: PerformanceRating
-  canAdvance: boolean
   hasNextLevel: boolean
   onNextLevel: () => void
   onRetry: () => void
@@ -17,7 +16,6 @@ export function CompletionModal({
   score,
   moves,
   rating,
-  canAdvance,
   hasNextLevel,
   onNextLevel,
   onRetry,
@@ -53,22 +51,14 @@ export function CompletionModal({
           </div>
         </div>
 
-        <div
-          className={`mt-6 rounded-xl border p-4 text-sm ${
-            canAdvance
-              ? 'border-emerald-800/30 bg-emerald-950/20 text-emerald-400'
-              : 'border-amber-800/30 bg-amber-950/20 text-amber-400'
-          }`}
-        >
-          {canAdvance
-            ? hasNextLevel
-              ? 'Great work. You scored high enough to unlock the next route.'
-              : 'Great work. You restored every route in PacketPath.'
-            : 'Route restored, but your score is too low to advance. Try again with fewer moves.'}
+        <div className="mt-6 rounded-xl border border-emerald-800/30 bg-emerald-950/20 p-4 text-sm text-emerald-400">
+          {hasNextLevel
+            ? 'Nice work. Route restored. Head to the next level.'
+            : 'Great work. You restored every route in PacketPath.'}
         </div>
 
         <div className="mt-6 grid gap-3">
-          {canAdvance && hasNextLevel && (
+          {hasNextLevel && (
             <button
               type="button"
               onClick={onNextLevel}
