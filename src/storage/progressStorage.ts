@@ -8,6 +8,8 @@ export type LevelProgress = {
 export type PlayerProgress = {
   highestUnlockedLevelId: number
   completedLevels: Record<number, LevelProgress>
+  endlessHighestDepth: number
+  dailyCompletions: Record<string, LevelProgress>
 }
 
 const STORAGE_KEY = 'packet-path-progress'
@@ -15,6 +17,8 @@ const STORAGE_KEY = 'packet-path-progress'
 const defaultProgress: PlayerProgress = {
   highestUnlockedLevelId: 1,
   completedLevels: {},
+  endlessHighestDepth: 0,
+  dailyCompletions: {},
 }
 
 export function loadProgress(): PlayerProgress {
@@ -49,6 +53,7 @@ export function saveLevelProgress(
     : moves
 
   const updatedProgress: PlayerProgress = {
+    ...progress,
     highestUnlockedLevelId: nextLevelId
       ? Math.max(progress.highestUnlockedLevelId, nextLevelId)
       : progress.highestUnlockedLevelId,
@@ -71,4 +76,37 @@ export function saveLevelProgress(
 export function resetProgress(): PlayerProgress {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultProgress))
   return defaultProgress
+}
+
+export function saveEndlessDepth(depth: number): PlayerProgress {
+  const progress = loadProgress()
+  const updatedProgress: PlayerProgress = {
+    ...progress,
+    endlessHighestDepth: Math.max(progress.endlessHighestDepth, depth),
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedProgress))
+  return updatedProgress
+}
+
+export function saveDailyProgress(
+  dateKey: string,
+  score: number,
+  moves: number,
+): PlayerProgress {
+  const progress = loadProgress()
+  const existing = progress.dailyCompletions[dateKey]
+  const updatedProgress: PlayerProgress = {
+    ...progress,
+    dailyCompletions: {
+      ...progress.dailyCompletions,
+      [dateKey]: {
+        levelId: 0,
+        bestScore: existing ? Math.max(existing.bestScore, score) : score,
+        bestMoves: existing ? Math.min(existing.bestMoves, moves) : moves,
+        completedAt: new Date().toISOString(),
+      },
+    },
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedProgress))
+  return updatedProgress
 }

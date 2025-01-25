@@ -32,6 +32,8 @@ export type Level = {
   rows: number
   cols: number
   tiles: Tile[][]
+  isGenerated?: boolean
+  seed?: number
 }
 
 export type GameStatus = 'playing' | 'completed'
