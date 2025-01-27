@@ -21,8 +21,11 @@ function App() {
   const [settings, setSettings] = useState(() => loadSettings())
   const completionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const prevStatusRef = useRef(gameState.status)
+  const [gameMode, setGameMode] = useState<'campaign' | 'endless'>('campaign')
+  const [endlessDepth, setEndlessDepth] = useState(0)
+  const [endlessSeed] = useState(() => Date.now())
 
-  const hasNextLevel = activeLevelIndex < levels.length - 1
+  const hasNextLevel = gameMode === 'endless' || activeLevelIndex < levels.length - 1
 
   const levelScore =
     gameState.status === 'completed' && gameState.completedAt !== null
@@ -75,12 +78,16 @@ function App() {
 
   function handleRestart() {
     clearCompletionTimer()
-    if (gameState.status === 'completed' && levelScore) {
+    if (gameState.status === 'completed' && levelScore && gameMode === 'campaign') {
       const updatedProgress = saveLevelProgress(gameState.level.id, levelScore.score, gameState.moves)
       setProgress(updatedProgress)
     }
     setShowCompletionModal(false)
-    setGameState(createGameState(levels[activeLevelIndex]))
+    if (gameMode === 'endless') {
+      setGameState(createGameState(generateLevel(endlessDepth, endlessSeed + endlessDepth)))
+    } else {
+      setGameState(createGameState(levels[activeLevelIndex]))
+    }
   }
 
   function handleSelectLevel(levelIndex: number) {
@@ -92,8 +99,39 @@ function App() {
     setGameState(createGameState(selectedLevel))
   }
 
+  function handleStartEndless() {
+    const depth = 1
+    clearCompletionTimer()
+    setShowCompletionModal(false)
+    setGameMode('endless')
+    setEndlessDepth(depth)
+    setGameState(createGameState(generateLevel(depth, endlessSeed + depth)))
+  }
+
+  function handleBackToCampaign() {
+    clearCompletionTimer()
+    setShowCompletionModal(false)
+    setGameMode('campaign')
+    setEndlessDepth(0)
+    setGameState(createGameState(levels[activeLevelIndex]))
+  }
+
   function handleNextLevel() {
-    if (!hasNextLevel || !levelScore) return
+    if (!levelScore) return
+
+    if (gameMode === 'endless') {
+      const nextDepth = endlessDepth + 1
+      const nextLevel = generateLevel(nextDepth, endlessSeed + nextDepth)
+      const updatedProgress = saveEndlessDepth(nextDepth)
+      clearCompletionTimer()
+      setShowCompletionModal(false)
+      setProgress(updatedProgress)
+      setEndlessDepth(nextDepth)
+      setGameState(createGameState(nextLevel))
+      return
+    }
+
+    if (!hasNextLevel) return
 
     const nextLevelIndex = activeLevelIndex + 1
     const nextLevel = levels[nextLevelIndex]
