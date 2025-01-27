@@ -7,7 +7,8 @@ import { playCompletionSound, playTileRotateSound } from './audio/soundEffects'
 import { createGameState, rotateTile } from './game/engine'
 import { levels } from './game/levels'
 import { calculateLevelScore } from './game/scoring'
-import { loadProgress, saveLevelProgress } from './storage/progressStorage'
+import { loadProgress, saveLevelProgress, saveEndlessDepth } from './storage/progressStorage'
+import { generateLevel } from './game/levelGenerator'
 import { loadSettings, saveSettings } from './storage/settingsStorage'
 
 function App() {
