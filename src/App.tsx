@@ -202,13 +202,47 @@ function App() {
             </p>
           </div>
 
-          <div className="mt-6">
-            <LevelSelector
-              levels={levels}
-              activeLevelId={gameState.level.id}
-              progress={progress}
-              onSelectLevel={handleSelectLevel}
-            />
+          <div className="mt-6 space-y-3">
+            {gameMode === 'endless' ? (
+              <>
+                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.03] p-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#3a3530]">
+                    Endless Mode
+                  </p>
+                  <p className="mt-2 text-4xl font-bold tabular-nums text-[#e8e2d8]">
+                    Route {endlessDepth}
+                  </p>
+                  {progress.endlessHighestDepth > 0 && (
+                    <p className="mt-1 text-xs text-[#4a4540]">
+                      Best: Route {progress.endlessHighestDepth}
+                    </p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={handleBackToCampaign}
+                  className="w-full rounded-xl border border-[#252220] px-4 py-2.5 text-sm text-[#6b6460] transition hover:border-[#403c36] hover:text-[#c8c0b4]"
+                >
+                  ← Back to Campaign
+                </button>
+              </>
+            ) : (
+              <>
+                <LevelSelector
+                  levels={levels}
+                  activeLevelId={gameState.level.id}
+                  progress={progress}
+                  onSelectLevel={handleSelectLevel}
+                />
+                <button
+                  type="button"
+                  onClick={handleStartEndless}
+                  className="w-full rounded-xl border border-[#252220] px-4 py-3 text-sm font-semibold text-[#6b6460] transition hover:border-amber-500/30 hover:text-amber-400"
+                >
+                  Endless Mode →
+                </button>
+              </>
+            )}
           </div>
         </div>
 
@@ -271,7 +305,9 @@ function App() {
 
             {/* Level identity */}
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-500/80">
-              Level {gameState.level.id} of {levels.length}
+              {gameMode === 'endless'
+                ? `Endless · Route ${endlessDepth}`
+                : `Level ${gameState.level.id} of ${levels.length}`}
             </p>
             <h2 className="mt-2 text-2xl font-bold text-[#e8e2d8]">
               {gameState.level.name}
