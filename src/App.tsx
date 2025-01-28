@@ -220,7 +220,30 @@ function App() {
           </div>
 
           <div className="mt-6 space-y-3">
-            {gameMode === 'endless' ? (
+            {gameMode === 'campaign' ? (
+              <>
+                <LevelSelector
+                  levels={levels}
+                  activeLevelId={gameState.level.id}
+                  progress={progress}
+                  onSelectLevel={handleSelectLevel}
+                />
+                <button
+                  type="button"
+                  onClick={handleStartDaily}
+                  className="w-full rounded-xl border border-[#252220] px-4 py-3 text-sm font-semibold text-[#6b6460] transition hover:border-sky-500/30 hover:text-sky-400"
+                >
+                  Daily Challenge →
+                </button>
+                <button
+                  type="button"
+                  onClick={handleStartEndless}
+                  className="w-full rounded-xl border border-[#252220] px-4 py-3 text-sm font-semibold text-[#6b6460] transition hover:border-amber-500/30 hover:text-amber-400"
+                >
+                  Endless Mode →
+                </button>
+              </>
+            ) : gameMode === 'endless' ? (
               <>
                 <div className="rounded-2xl border border-white/[0.07] bg-white/[0.03] p-4">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#3a3530]">
@@ -245,18 +268,23 @@ function App() {
               </>
             ) : (
               <>
-                <LevelSelector
-                  levels={levels}
-                  activeLevelId={gameState.level.id}
-                  progress={progress}
-                  onSelectLevel={handleSelectLevel}
-                />
+                <div className="rounded-2xl border border-white/[0.07] bg-white/[0.03] p-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#3a3530]">
+                    Daily Challenge
+                  </p>
+                  <p className="mt-2 text-lg font-bold text-[#e8e2d8]">{DAILY_DATE_KEY}</p>
+                  {progress.dailyCompletions[DAILY_DATE_KEY] && (
+                    <p className="mt-1 text-xs text-emerald-400">
+                      Best: {progress.dailyCompletions[DAILY_DATE_KEY].bestScore} pts · {progress.dailyCompletions[DAILY_DATE_KEY].bestMoves} moves
+                    </p>
+                  )}
+                </div>
                 <button
                   type="button"
-                  onClick={handleStartEndless}
-                  className="w-full rounded-xl border border-[#252220] px-4 py-3 text-sm font-semibold text-[#6b6460] transition hover:border-amber-500/30 hover:text-amber-400"
+                  onClick={handleBackToCampaign}
+                  className="w-full rounded-xl border border-[#252220] px-4 py-2.5 text-sm text-[#6b6460] transition hover:border-[#403c36] hover:text-[#c8c0b4]"
                 >
-                  Endless Mode →
+                  ← Back to Campaign
                 </button>
               </>
             )}
