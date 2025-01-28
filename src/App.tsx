@@ -7,9 +7,12 @@ import { playCompletionSound, playTileRotateSound } from './audio/soundEffects'
 import { createGameState, rotateTile } from './game/engine'
 import { levels } from './game/levels'
 import { calculateLevelScore } from './game/scoring'
-import { loadProgress, saveLevelProgress, saveEndlessDepth } from './storage/progressStorage'
+import { loadProgress, saveLevelProgress, saveEndlessDepth, saveDailyProgress } from './storage/progressStorage'
 import { generateLevel } from './game/levelGenerator'
 import { loadSettings, saveSettings } from './storage/settingsStorage'
+
+const DAILY_DATE_KEY = new Date().toISOString().slice(0, 10)
+const DAILY_SEED = parseInt(DAILY_DATE_KEY.replace(/-/g, ''), 10)
 
 function App() {
   const [hasStartedGame, setHasStartedGame] = useState(false)
@@ -21,11 +24,11 @@ function App() {
   const [settings, setSettings] = useState(() => loadSettings())
   const completionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const prevStatusRef = useRef(gameState.status)
-  const [gameMode, setGameMode] = useState<'campaign' | 'endless'>('campaign')
+  const [gameMode, setGameMode] = useState<'campaign' | 'endless' | 'daily'>('campaign')
   const [endlessDepth, setEndlessDepth] = useState(0)
   const [endlessSeed] = useState(() => Date.now())
 
-  const hasNextLevel = gameMode === 'endless' || activeLevelIndex < levels.length - 1
+  const hasNextLevel = gameMode === 'endless' || (gameMode === 'campaign' && activeLevelIndex < levels.length - 1)
 
   const levelScore =
     gameState.status === 'completed' && gameState.completedAt !== null
@@ -78,13 +81,20 @@ function App() {
 
   function handleRestart() {
     clearCompletionTimer()
-    if (gameState.status === 'completed' && levelScore && gameMode === 'campaign') {
-      const updatedProgress = saveLevelProgress(gameState.level.id, levelScore.score, gameState.moves)
-      setProgress(updatedProgress)
+    if (gameState.status === 'completed' && levelScore) {
+      if (gameMode === 'campaign') {
+        const updatedProgress = saveLevelProgress(gameState.level.id, levelScore.score, gameState.moves)
+        setProgress(updatedProgress)
+      } else if (gameMode === 'daily') {
+        const updatedProgress = saveDailyProgress(DAILY_DATE_KEY, levelScore.score, gameState.moves)
+        setProgress(updatedProgress)
+      }
     }
     setShowCompletionModal(false)
     if (gameMode === 'endless') {
       setGameState(createGameState(generateLevel(endlessDepth, endlessSeed + endlessDepth)))
+    } else if (gameMode === 'daily') {
+      setGameState(createGameState(generateLevel(16, DAILY_SEED)))
     } else {
       setGameState(createGameState(levels[activeLevelIndex]))
     }
@@ -106,6 +116,13 @@ function App() {
     setGameMode('endless')
     setEndlessDepth(depth)
     setGameState(createGameState(generateLevel(depth, endlessSeed + depth)))
+  }
+
+  function handleStartDaily() {
+    clearCompletionTimer()
+    setShowCompletionModal(false)
+    setGameMode('daily')
+    setGameState(createGameState(generateLevel(16, DAILY_SEED)))
   }
 
   function handleBackToCampaign() {
