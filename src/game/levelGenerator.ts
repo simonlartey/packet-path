@@ -208,15 +208,12 @@ export function generateLevel(id: number, seed: number): Level {
     }
   }
 
-  // Place decoy cable tiles in remaining empty cells
-  let dc = 0
+  // Fill ALL remaining empty cells with decoy cable tiles
   for (const cell of nonPath) {
-    if (dc >= config.decoys) break
     if (fireKeys.has(key(cell))) continue
     const type: TileType = rand() < 0.5 ? 'straight' : 'corner'
     const rotation = Math.floor(rand() * 4) * 90
     grid[cell.row][cell.col] = { id: `${cell.row}-${cell.col}`, type, rotation, locked: false }
-    dc++
   }
 
   // Scramble unlocked path tiles (always at least 1 step away from solved)
