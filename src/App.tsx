@@ -183,6 +183,7 @@ function App() {
           onNextLevel={handleNextLevel}
           onRetry={handleRestart}
           onClose={() => setShowCompletionModal(false)}
+          onStartEndless={gameMode === 'campaign' && !hasNextLevel ? handleStartEndless : undefined}
         />
       )}
 

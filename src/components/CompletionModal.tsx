@@ -9,6 +9,7 @@ type CompletionModalProps = {
   onNextLevel: () => void
   onRetry: () => void
   onClose: () => void
+  onStartEndless?: () => void
 }
 
 export function CompletionModal({
@@ -20,6 +21,7 @@ export function CompletionModal({
   onNextLevel,
   onRetry,
   onClose,
+  onStartEndless,
 }: CompletionModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-6 backdrop-blur-sm">
@@ -65,6 +67,16 @@ export function CompletionModal({
               className="rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white transition hover:bg-emerald-600"
             >
               Next Level
+            </button>
+          )}
+
+          {onStartEndless && (
+            <button
+              type="button"
+              onClick={onStartEndless}
+              className="rounded-xl bg-amber-700/80 px-5 py-3 font-semibold text-amber-100 transition hover:bg-amber-600"
+            >
+              Try Endless Mode
             </button>
           )}
 
