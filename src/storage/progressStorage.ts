@@ -29,7 +29,8 @@ export function loadProgress(): PlayerProgress {
   }
 
   try {
-    return JSON.parse(storedProgress) as PlayerProgress
+    const parsed = JSON.parse(storedProgress) as PlayerProgress
+    return { ...defaultProgress, ...parsed }
   } catch {
     return defaultProgress
   }
