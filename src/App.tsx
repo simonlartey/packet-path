@@ -5,30 +5,39 @@ import { LandingPage } from './components/LandingPage'
 import { ModeSelector } from './components/ModeSelector'
 import { playCompletionSound, playTileRotateSound } from './audio/soundEffects'
 import { createGameState, rotateTile } from './game/engine'
+import { DAILY_CHALLENGE_DEPTH, ENDLESS_START_DEPTH } from './game/constants'
 import { levels } from './game/levels'
-import { calculateLevelScore } from './game/scoring'
-import { loadProgress, saveLevelProgress, saveEndlessDepth, saveDailyProgress } from './storage/progressStorage'
+import { calculateLevelScore, getMaxDisplayScore } from './game/scoring'
 import { generateLevel } from './game/levelGenerator'
-import { loadSettings, saveSettings } from './storage/settingsStorage'
+import { useCelebration } from './hooks/useCelebration'
+import { useProgress } from './hooks/useProgress'
+import { useSettings } from './hooks/useSettings'
 
 const DAILY_DATE_KEY = new Date().toISOString().slice(0, 10)
 const DAILY_SEED = parseInt(DAILY_DATE_KEY.replace(/-/g, ''), 10)
 
+type GameMode = 'campaign' | 'endless' | 'daily'
+
 function App() {
   const [hasStartedGame, setHasStartedGame] = useState(false)
+  const [gameMode, setGameMode] = useState<GameMode>('campaign')
   const [activeLevelIndex, setActiveLevelIndex] = useState(0)
   const [gameState, setGameState] = useState(() => createGameState(levels[0]))
-  const [progress, setProgress] = useState(() => loadProgress())
-  const [showCompletionModal, setShowCompletionModal] = useState(false)
-  const [isCelebrating, setIsCelebrating] = useState(false)
-  const [settings, setSettings] = useState(() => loadSettings())
-  const completionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const prevStatusRef = useRef(gameState.status)
-  const [gameMode, setGameMode] = useState<'campaign' | 'endless' | 'daily'>('campaign')
   const [endlessDepth, setEndlessDepth] = useState(0)
   const [endlessSeed] = useState(() => Date.now())
+  const [showCompletionModal, setShowCompletionModal] = useState(false)
 
-  const hasNextLevel = gameMode === 'endless' || (gameMode === 'campaign' && activeLevelIndex < levels.length - 1)
+  const { soundEnabled, toggleSound } = useSettings()
+  const { progress, recordCampaignLevel, recordDailyCompletion, recordEndlessDepth } = useProgress()
+  const { isCelebrating, startCelebration, clearCelebration } = useCelebration(() =>
+    setShowCompletionModal(true),
+  )
+
+  const prevStatusRef = useRef(gameState.status)
+
+  const hasNextLevel =
+    gameMode === 'endless' ||
+    (gameMode === 'campaign' && activeLevelIndex < levels.length - 1)
 
   const levelScore =
     gameState.status === 'completed' && gameState.completedAt !== null
@@ -40,97 +49,46 @@ function App() {
       : null
 
   const currentLevelProgress = progress.completedLevels[gameState.level.id]
-  const maxLevelScore = 1000 + gameState.level.id * 25
-
-  function clearCompletionTimer() {
-    if (completionTimerRef.current) {
-      clearTimeout(completionTimerRef.current)
-      completionTimerRef.current = null
-    }
-    setIsCelebrating(false)
-  }
+  const maxDisplayScore = getMaxDisplayScore(gameState.level.id)
 
   useEffect(() => {
     if (prevStatusRef.current === 'playing' && gameState.status === 'completed') {
-      if (settings.soundEnabled) playCompletionSound()
+      if (soundEnabled) playCompletionSound()
     }
     prevStatusRef.current = gameState.status
-  }, [gameState.status, settings.soundEnabled])
+  }, [gameState.status, soundEnabled])
 
   function handleRotateTile(row: number, col: number) {
-    if (settings.soundEnabled && gameState.status === 'playing') {
-      playTileRotateSound()
-    }
-    setGameState((currentState) => rotateTile(currentState, row, col))
-  }
-
-  function handleToggleSound() {
-    const updated = { soundEnabled: !settings.soundEnabled }
-    setSettings(updated)
-    saveSettings(updated)
+    if (soundEnabled && gameState.status === 'playing') playTileRotateSound()
+    setGameState(current => rotateTile(current, row, col))
   }
 
   function handlePacketAnimationComplete() {
-    setIsCelebrating(true)
-    completionTimerRef.current = setTimeout(() => {
-      completionTimerRef.current = null
-      setIsCelebrating(false)
-      setShowCompletionModal(true)
-    }, 2500)
+    startCelebration()
+  }
+
+  function resetToLevel(nextGameState: ReturnType<typeof createGameState>) {
+    clearCelebration()
+    setShowCompletionModal(false)
+    setGameState(nextGameState)
   }
 
   function handleRestart() {
-    clearCompletionTimer()
     if (gameState.status === 'completed' && levelScore) {
       if (gameMode === 'campaign') {
-        const updatedProgress = saveLevelProgress(gameState.level.id, levelScore.score, gameState.moves)
-        setProgress(updatedProgress)
+        recordCampaignLevel(gameState.level.id, levelScore.score, gameState.moves)
       } else if (gameMode === 'daily') {
-        const updatedProgress = saveDailyProgress(DAILY_DATE_KEY, levelScore.score, gameState.moves)
-        setProgress(updatedProgress)
+        recordDailyCompletion(DAILY_DATE_KEY, levelScore.score, gameState.moves)
       }
     }
-    setShowCompletionModal(false)
+
     if (gameMode === 'endless') {
-      setGameState(createGameState(generateLevel(endlessDepth, endlessSeed + endlessDepth)))
+      resetToLevel(createGameState(generateLevel(endlessDepth, endlessSeed + endlessDepth)))
     } else if (gameMode === 'daily') {
-      setGameState(createGameState(generateLevel(16, DAILY_SEED)))
+      resetToLevel(createGameState(generateLevel(DAILY_CHALLENGE_DEPTH, DAILY_SEED)))
     } else {
-      setGameState(createGameState(levels[activeLevelIndex]))
+      resetToLevel(createGameState(levels[activeLevelIndex]))
     }
-  }
-
-  function handleSelectLevel(levelIndex: number) {
-    const selectedLevel = levels[levelIndex]
-    if (selectedLevel.id > progress.highestUnlockedLevelId) return
-    clearCompletionTimer()
-    setShowCompletionModal(false)
-    setActiveLevelIndex(levelIndex)
-    setGameState(createGameState(selectedLevel))
-  }
-
-  function handleStartEndless() {
-    const depth = 1
-    clearCompletionTimer()
-    setShowCompletionModal(false)
-    setGameMode('endless')
-    setEndlessDepth(depth)
-    setGameState(createGameState(generateLevel(depth, endlessSeed + depth)))
-  }
-
-  function handleStartDaily() {
-    clearCompletionTimer()
-    setShowCompletionModal(false)
-    setGameMode('daily')
-    setGameState(createGameState(generateLevel(16, DAILY_SEED)))
-  }
-
-  function handleBackToCampaign() {
-    clearCompletionTimer()
-    setShowCompletionModal(false)
-    setGameMode('campaign')
-    setEndlessDepth(0)
-    setGameState(createGameState(levels[activeLevelIndex]))
   }
 
   function handleNextLevel() {
@@ -138,33 +96,43 @@ function App() {
 
     if (gameMode === 'endless') {
       const nextDepth = endlessDepth + 1
-      const nextLevel = generateLevel(nextDepth, endlessSeed + nextDepth)
-      const updatedProgress = saveEndlessDepth(nextDepth)
-      clearCompletionTimer()
-      setShowCompletionModal(false)
-      setProgress(updatedProgress)
+      recordEndlessDepth(nextDepth)
       setEndlessDepth(nextDepth)
-      setGameState(createGameState(nextLevel))
+      resetToLevel(createGameState(generateLevel(nextDepth, endlessSeed + nextDepth)))
       return
     }
 
     if (!hasNextLevel) return
 
-    const nextLevelIndex = activeLevelIndex + 1
-    const nextLevel = levels[nextLevelIndex]
+    const nextIndex = activeLevelIndex + 1
+    const nextLevel = levels[nextIndex]
+    recordCampaignLevel(gameState.level.id, levelScore.score, gameState.moves, nextLevel.id)
+    setActiveLevelIndex(nextIndex)
+    resetToLevel(createGameState(nextLevel))
+  }
 
-    const updatedProgress = saveLevelProgress(
-      gameState.level.id,
-      levelScore.score,
-      gameState.moves,
-      nextLevel.id,
-    )
+  function handleSelectLevel(levelIndex: number) {
+    const selected = levels[levelIndex]
+    if (selected.id > progress.highestUnlockedLevelId) return
+    setActiveLevelIndex(levelIndex)
+    resetToLevel(createGameState(selected))
+  }
 
-    clearCompletionTimer()
-    setShowCompletionModal(false)
-    setProgress(updatedProgress)
-    setActiveLevelIndex(nextLevelIndex)
-    setGameState(createGameState(nextLevel))
+  function handleStartEndless() {
+    setGameMode('endless')
+    setEndlessDepth(ENDLESS_START_DEPTH)
+    resetToLevel(createGameState(generateLevel(ENDLESS_START_DEPTH, endlessSeed + ENDLESS_START_DEPTH)))
+  }
+
+  function handleStartDaily() {
+    setGameMode('daily')
+    resetToLevel(createGameState(generateLevel(DAILY_CHALLENGE_DEPTH, DAILY_SEED)))
+  }
+
+  function handleBackToCampaign() {
+    setGameMode('campaign')
+    setEndlessDepth(0)
+    resetToLevel(createGameState(levels[activeLevelIndex]))
   }
 
   if (!hasStartedGame) {
@@ -196,17 +164,17 @@ function App() {
         </span>
         <button
           type="button"
-          onClick={handleToggleSound}
+          onClick={toggleSound}
           className="ml-auto rounded-lg border border-[#252220] px-3 py-1.5 text-xs text-[#4a4540] transition hover:border-[#403c36] hover:text-[#c8c0b4]"
         >
-          {settings.soundEnabled ? 'Sound On' : 'Sound Off'}
+          {soundEnabled ? 'Sound On' : 'Sound Off'}
         </button>
       </nav>
 
-      {/* Three-column main content */}
+      {/* Three-column layout */}
       <div className="flex min-h-0 flex-1">
 
-        {/* Left column — title + campaign selector */}
+        {/* Left column — title + mode selector */}
         <div className="flex w-72 shrink-0 flex-col border-r border-[#1e1c18] px-6 py-8">
           <div className="shrink-0">
             <h1 className="text-3xl font-bold leading-tight tracking-tight text-[#e8e2d8]">
@@ -234,7 +202,7 @@ function App() {
           />
         </div>
 
-        {/* Center column — board + legend + level selector */}
+        {/* Center column — board + celebration + legend */}
         <div className="flex flex-1 flex-col items-center justify-center gap-5 overflow-auto px-6 py-8">
           <GameBoard
             gameState={gameState}
@@ -242,7 +210,6 @@ function App() {
             onPacketAnimationComplete={handlePacketAnimationComplete}
           />
 
-          {/* Celebration card */}
           {isCelebrating && levelScore && (
             <div className="celebration-card-in flex w-full max-w-[576px] items-center gap-6 rounded-2xl border border-emerald-800/25 bg-emerald-950/20 px-6 py-4">
               <div>
@@ -252,7 +219,7 @@ function App() {
                 <p className="mt-1 text-4xl font-bold tabular-nums text-[#e8e2d8]">
                   {levelScore.score}
                 </p>
-                <p className="mt-0.5 text-xs text-[#3a3530]">/ {maxLevelScore} pts</p>
+                <p className="mt-0.5 text-xs text-[#3a3530]">/ {maxDisplayScore} pts</p>
               </div>
               <div className="ml-auto text-right">
                 <p className="text-xl text-amber-400">
@@ -263,7 +230,6 @@ function App() {
             </div>
           )}
 
-          {/* Legend */}
           <div className="flex items-center gap-6 text-xs text-[#4a4540]">
             <span className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full border border-amber-500/40 bg-[#1a1408]" />
@@ -284,14 +250,12 @@ function App() {
               Firewall
             </span>
           </div>
-
         </div>
 
-        {/* Right panel — stats + controls */}
+        {/* Right panel — stats + actions */}
         <aside className="flex w-80 shrink-0 flex-col overflow-y-auto border-l border-[#1e1c18]">
           <div className="flex-1 px-8 py-10">
 
-            {/* Level identity */}
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-500/80">
               {gameMode === 'endless'
                 ? `Endless · Route ${endlessDepth}`
@@ -301,7 +265,6 @@ function App() {
               {gameState.level.name}
             </h2>
 
-            {/* Meta pills */}
             <div className="mt-4 flex flex-wrap gap-2">
               <span className="flex items-center gap-1.5 rounded-full border border-[#252220] bg-[#1a1814] px-3 py-1 text-xs text-[#6b6460]">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500/70" />
@@ -317,7 +280,6 @@ function App() {
 
             <div className="mt-8 border-t border-[#1e1c18]" />
 
-            {/* Moves */}
             <div className="mt-6">
               <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#3a3530]">
                 Moves
@@ -334,7 +296,6 @@ function App() {
               </div>
             </div>
 
-            {/* Status */}
             <div className="mt-6">
               <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#3a3530]">
                 Status
@@ -355,7 +316,6 @@ function App() {
               </div>
             </div>
 
-            {/* Score */}
             {levelScore && (
               <div className="mt-6">
                 <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#3a3530]">
@@ -363,7 +323,7 @@ function App() {
                 </p>
                 <div className="mt-2 flex items-baseline gap-2">
                   <span className="text-4xl font-bold text-[#e8e2d8]">{levelScore.score}</span>
-                  <span className="text-sm text-[#3a3530]">/ {maxLevelScore}</span>
+                  <span className="text-sm text-[#3a3530]">/ {maxDisplayScore}</span>
                   <span className="ml-auto text-xs font-semibold text-amber-400">
                     {levelScore.rating} ★
                   </span>
@@ -372,14 +332,13 @@ function App() {
                   <div
                     className="h-full rounded-full bg-gradient-to-r from-amber-600 to-amber-400 transition-all duration-700"
                     style={{
-                      width: `${Math.min(100, (levelScore.score / maxLevelScore) * 100)}%`,
+                      width: `${Math.min(100, (levelScore.score / maxDisplayScore) * 100)}%`,
                     }}
                   />
                 </div>
               </div>
             )}
 
-            {/* Completion banner */}
             {gameState.status === 'completed' && (
               <div className="mt-6 flex items-start gap-2.5 rounded-xl border border-emerald-800/30 bg-emerald-950/20 p-4 text-sm leading-5 text-emerald-400">
                 <span className="mt-px shrink-0 text-base leading-none">✓</span>
@@ -392,7 +351,6 @@ function App() {
             )}
           </div>
 
-          {/* Action buttons */}
           <div className="shrink-0 space-y-2 border-t border-[#1e1c18] px-8 py-6">
             {gameState.status === 'completed' && hasNextLevel && (
               <button
