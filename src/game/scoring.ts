@@ -98,3 +98,7 @@ export function calculateLevelScore(
 
   return { score, rating: 'Complete' }
 }
+
+export function getMaxDisplayScore(levelId: number): number {
+  return 1000 + levelId * 25
+}
