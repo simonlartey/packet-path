@@ -4,10 +4,12 @@ import { TutorialPanel } from './components/TutorialPanel'
 import { createGameState, rotateTile } from './game/engine'
 import { levels } from './game/levels'
 import { calculateLevelScore } from './game/scoring'
+import { loadProgress, saveLevelProgress } from './storage/progressStorage'
 
 function App() {
   const [activeLevelIndex, setActiveLevelIndex] = useState(0)
   const [gameState, setGameState] = useState(() => createGameState(levels[0]))
+  const [progress, setProgress] = useState(() => loadProgress())
 
   const hasNextLevel = activeLevelIndex < levels.length - 1
 
@@ -15,6 +17,8 @@ function App() {
     gameState.status === 'completed'
       ? calculateLevelScore(gameState.level, gameState.moves)
       : null
+
+  const currentLevelProgress = progress.completedLevels[gameState.level.id]
 
   function handleRotateTile(row: number, col: number) {
     setGameState((currentState) => rotateTile(currentState, row, col))
@@ -25,12 +29,21 @@ function App() {
   }
 
   function handleNextLevel() {
-    if (!hasNextLevel) return
+    if (!hasNextLevel || !levelScore?.canAdvance) return
 
     const nextLevelIndex = activeLevelIndex + 1
+    const nextLevel = levels[nextLevelIndex]
 
+    const updatedProgress = saveLevelProgress(
+      gameState.level.id,
+      levelScore.score,
+      gameState.moves,
+      nextLevel.id,
+    )
+
+    setProgress(updatedProgress)
     setActiveLevelIndex(nextLevelIndex)
-    setGameState(createGameState(levels[nextLevelIndex]))
+    setGameState(createGameState(nextLevel))
   }
 
   return (
@@ -84,6 +97,19 @@ function App() {
                   <p className="mt-1 text-3xl font-bold">{levelScore.score}</p>
                   <p className="mt-1 text-sm font-semibold text-cyan-300">
                     {levelScore.rating}
+                  </p>
+                  <p className="mt-2 text-xs text-slate-500">
+                    Minimum to advance: 700
+                  </p>
+                </div>
+              )}
+
+              {currentLevelProgress && (
+                <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
+                  <p className="text-sm text-slate-400">Best Result</p>
+                  <p className="mt-1 text-xl font-bold">{currentLevelProgress.bestScore} pts</p>
+                  <p className="mt-1 text-sm text-slate-400">
+                    Best moves: {currentLevelProgress.bestMoves}
                   </p>
                 </div>
               )}
