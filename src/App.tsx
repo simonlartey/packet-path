@@ -4,16 +4,27 @@ import { TutorialPanel } from './components/TutorialPanel'
 import { createGameState, rotateTile } from './game/engine'
 import { levels } from './game/levels'
 
-
 function App() {
+  const [activeLevelIndex, setActiveLevelIndex] = useState(0)
   const [gameState, setGameState] = useState(() => createGameState(levels[0]))
+
+  const hasNextLevel = activeLevelIndex < levels.length - 1
 
   function handleRotateTile(row: number, col: number) {
     setGameState((currentState) => rotateTile(currentState, row, col))
   }
 
   function handleRestart() {
-    setGameState(createGameState(levels[0]))
+    setGameState(createGameState(levels[activeLevelIndex]))
+  }
+
+  function handleNextLevel() {
+    if (!hasNextLevel) return
+
+    const nextLevelIndex = activeLevelIndex + 1
+
+    setActiveLevelIndex(nextLevelIndex)
+    setGameState(createGameState(levels[nextLevelIndex]))
   }
 
   return (
@@ -39,7 +50,7 @@ function App() {
         <div className="space-y-6">
           <aside className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 shadow-2xl shadow-cyan-950/30">
             <p className="text-sm font-medium uppercase tracking-[0.3em] text-cyan-300">
-              Level {gameState.level.id}
+              Level {gameState.level.id} of {levels.length}
             </p>
 
             <h2 className="mt-3 text-2xl font-bold">{gameState.level.name}</h2>
@@ -64,17 +75,31 @@ function App() {
 
             {gameState.status === 'completed' && (
               <div className="mt-6 rounded-2xl border border-emerald-400/30 bg-emerald-400/10 p-4 text-emerald-200">
-                Nice work. The packet can now reach the destination.
+                {hasNextLevel
+                  ? 'Nice work. Continue to the next network route.'
+                  : 'Great job. You restored every route.'}
               </div>
             )}
 
-            <button
-              type="button"
-              onClick={handleRestart}
-              className="mt-6 w-full rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 shadow-lg shadow-cyan-400/20 transition hover:bg-cyan-300"
-            >
-              Restart Level
-            </button>
+            <div className="mt-6 grid gap-3">
+              {gameState.status === 'completed' && hasNextLevel && (
+                <button
+                  type="button"
+                  onClick={handleNextLevel}
+                  className="w-full rounded-xl bg-emerald-400 px-5 py-3 font-semibold text-slate-950 shadow-lg shadow-emerald-400/20 transition hover:bg-emerald-300"
+                >
+                  Next Level
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={handleRestart}
+                className="w-full rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 shadow-lg shadow-cyan-400/20 transition hover:bg-cyan-300"
+              >
+                Restart Level
+              </button>
+            </div>
           </aside>
 
           <TutorialPanel />
